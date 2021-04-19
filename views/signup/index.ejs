@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/signup/index.css">
+  <link rel="stylesheet" href="/common/global.css">
+  <title>BroCloud</title>
+</head>
+<body>
+  <h1 class="signup--title"><%= action %></h1>
+  <main class="u--center-content">
+    <form 
+      action="/<%= action %>" 
+      method="POST"
+      class="signup--form"
+    >
+      <label for="firstName">Enter your first name</label>
+      <input type="text" id="firstName" name="firstName">
+      <label for="lastName">Enter your last name</label>
+      <input type="text" id="lastName" name="lastName">
+      <label for="nickName">Enter your nick name</label>
+      <input type="text" id="nickName" name="nickName">
+      <% if (action === 'signup') { %>
+        <label for="club">Select a club to join</label>
+        <select name="clubId" id="club" class="signup--club">
+          <option selected value=null>None</option>
+          <% clubs.forEach((club) => { %>
+            <option value="<%= club._id %>">
+              <%= club.name %>
+            </option>
+          <% }); %>   
+        </select>
+        <label for="clubName">Or create a new club</label>
+        <input type="text" id="clubName" name="clubName">
+      <% } %>
+      <button class="btn--primary"><%= action %></button>
+    </form>
+  </main>
+</body>
+
+<script src="/signup/index.js"></script>
+</html>

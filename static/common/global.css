@@ -1,0 +1,54 @@
+:root {
+  --dark-green: #026670;
+  --light-green: #9FEDD7; 
+  --light-yellow: #FEF9C7;
+  --dark-yellow: #FCE181;
+  --beige: #EDEAE5;
+  --white: white;
+  --black: black;
+}
+
+html {
+  font-size: 62.5%
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img {
+  object-fit: cover;
+  height: 100%;
+  width: 100%;
+}
+
+.u--center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+input, select {
+  height: 3rem;
+  font-size: 1.8rem;
+  outline: none;
+}
+
+:is(input, select):hover {
+  border: solid 1px var(--dark-green);
+}
+
+.btn--primary {
+  background-color: var(--dark-green);
+  color: var(--light-yellow);
+  padding: 1rem 2rem;
+  border-radius: 4px;
+  font-size: 2rem;
+  border: none;
+  text-transform: capitalize;
+}
+
+.btn--primary:hover {
+  background-color: var(--light-green);
+  color: var(--black);
+}

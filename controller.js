@@ -1,7 +1,29 @@
 const mongoUtil = require('./mongoUtil');
 const catchError = require('./util/catchError');
 const throwError = require('./util/throwError');
-const addCollections = require('./collections/addCollections');
+const { format, differenceInDays } = require('date-fns');
+const fetch = require('node-fetch');
+const { youtubeApiKey } = require('./keys')
+
+const formatTimestamp = (timestamp) => {
+  const now = new Date();
+  const timeOfPost = new Date(timestamp);
+  const checkDay = differenceInDays(timeOfPost, now);
+
+  if (checkDay === 0) {
+    return `Today at ${format(timeOfPost, 'h:m aaa')}`;
+  }
+
+  if (checkDay === 1) {
+    return `Yesterday at ${format(timeOfPost, 'h:m aaa')}`;
+  }
+
+  if (checkDay > 1 && checkDay < 7) {
+    return format(timeOfPost, 'EEEE h:m aaa');
+  }
+
+  return format(timeOfPost, 'MMM do h:m aaa');
+}
 
 const db = mongoUtil.getDb();
 // addCollections(db);
@@ -9,6 +31,8 @@ const { ObjectID } = require('mongodb');
 
 const User = db.collection('user');
 const Club = db.collection('club');
+const Video = db.collection('video');
+const Playlist = db.collection('playlist');
 
 const findDocuments = (
   db, query = {}, options = {} 
@@ -48,10 +72,10 @@ exports.signup = catchError(async (req, res, next) => {
     clubName,
     clubId
   } = req.body;
-
+  console.log(req.body)
   let club = {};
-  if (clubId !== 'null') {
-    club._id = clubId
+  if (clubId && clubId !== 'null') {
+    club._id = clubId;
   } else {
     if (!clubName) {
       return throwError('New club must have a name', 403);
@@ -59,10 +83,18 @@ exports.signup = catchError(async (req, res, next) => {
 
     const checkClubExists = await Club.findOne({ name: clubName })
     if (checkClubExists) {
-      return throwError(`Club already exists with the name ${clubName}`, 403)
+      return throwError(`Club already exists with the name ${clubName}`, 403);
     }
 
-    club = await addDocument(Club, { name: clubName})
+    club = await addDocument(Club, { name: clubName, listeningHistory: []});
+    await addDocument(
+      Playlist, 
+      {
+        clubId: new ObjectID(club._id),
+        currentlyPlaying: {},
+        upNext: []
+      }
+    );
   }
 
   const userDoc = {
@@ -71,16 +103,65 @@ exports.signup = catchError(async (req, res, next) => {
     nickName,
     clubId: new ObjectID(club._id),
     isActive: false
-  }
+  };
 
-  const savedUser = await addDocument(User, userDoc)
-  res.status(200).json({ user: savedUser })
+  const savedUser = await addDocument(User, userDoc);
+  res.status(200).json({ user: savedUser });
 })
 
 exports.getMusic = catchError(async (req, res, next) => {
+  const { clubId } = req.params;
+
+  const userPromise = findDocuments(User, { clubId });
+  const clubPromise = Club.findOne({ _id: new ObjectID(clubId) });
+  const playlistPromise = Playlist.aggregate([
+    { $match: { clubId: new ObjectID(clubId) } },
+    { 
+      $lookup: {
+        from: 'video',
+        localField: 'upNext',
+        foreignField: '_id',
+        as: 'videoList'
+      }
+    }
+  ]).toArray();
+
+  const [
+    members, 
+    club, 
+    playlist
+  ] = await Promise.all([
+    userPromise,
+    clubPromise,
+    playlistPromise
+  ]);
+  console.log(playlist)
+  const history = club.listeningHistory.map(video => {
+    const timestamp = formatTimestamp(video.mostRecentlyPlayed)
+
+    return {
+      name: video.name,
+      userFullName: video.userFullName,
+      timestamp
+    }
+  });
+  
   const data = {
-    
+    members,
+    club,
+    playlist,
+    history,
+    currentlyPlaying: playlist[0].currentlyPlaying
   };
 
   res.render('./main/index.ejs', data);
 });
+
+exports.search = catchError(async (req, res, next) => {
+  const url = `https://www.googleapis.com/youtube/v3/search?type=video&part=snippet&maxResults=3&q=${req.body.searchQuery}&key=${youtubeApiKey}&fields=items(id,snippet/title,snippet/thumbnails/default)&videoCategoryId=10`
+  const response = await fetch(url);
+  const results = await response.json();
+  console.log(results.items[0])
+  res.status(200).json({ results });
+});
+

@@ -53,6 +53,11 @@
       options.body = JSON.stringify(body);
       const data = await request("/signup", options);
       return Promise.resolve(data);
+    },
+    search: async (body) => {
+      options.body = JSON.stringify(body);
+      const data = await request("/search", options);
+      return Promise.resolve(data);
     }
   };
 
@@ -68,7 +73,7 @@
     const body = formState.formData();
     const data = await api_default.signup(body);
     localStorage.setItem("user", JSON.stringify(data.user));
-    window.location.replace(`${host}/music/${data.user._id}`);
+    window.location.replace(`${host}/music/${data.user.clubId}`);
   }
 })();
 //# sourceMappingURL=index.js.map

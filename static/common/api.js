@@ -22,5 +22,10 @@ export default {
     options.body = JSON.stringify(body);
     const data = await request('/signup', options);
     return Promise.resolve(data)
-  }
+  },
+  search: async body => {
+    options.body = JSON.stringify(body);
+    const data = await request('/search', options);
+    return Promise.resolve(data)
+  },
 };

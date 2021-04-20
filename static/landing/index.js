@@ -8,5 +8,5 @@ function checkForUser() {
     return window.location.replace(`${host}/signup`)
   }
 
-  window.location.replace(`${host}/music/${user._id}`)
+  window.location.replace(`${host}/music/${user.clubId}`);
 }

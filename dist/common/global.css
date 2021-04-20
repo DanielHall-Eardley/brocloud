@@ -2,11 +2,15 @@
 :root {
   --dark-green: #026670;
   --light-green: #9FEDD7;
+  --green: green;
+  --red: red;
   --light-yellow: #FEF9C7;
   --dark-yellow: #FCE181;
   --beige: #EDEAE5;
   --white: white;
   --black: black;
+  --gray: gray;
+  --border: solid 1px var(--dark-green);
 }
 html {
   font-size: 62.5%;
@@ -45,4 +49,50 @@ select {
 .btn--primary:hover {
   background-color: var(--light-green);
   color: var(--black);
+}
+.btn--result {
+  background-color: var(--light-green);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  width: 100%;
+}
+.u--redcircle,
+.u--green-circle {
+  height: 1rem;
+  width: 1rem;
+  border-radius: 50%;
+}
+.u--green-circle {
+  color: var(--green);
+}
+.u--red-circle {
+  color: var(--green);
+}
+section,
+aside {
+  border: var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+}
+h3 {
+  font-size: 2rem;
+  margin-top: 0;
+}
+h4 {
+  font-size: 1.8rem;
+  color: var(--gray);
+}
+ul {
+  list-style: none;
+  padding: 0;
+}
+img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
 }

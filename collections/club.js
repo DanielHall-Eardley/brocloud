@@ -8,6 +8,9 @@ module.exports = {
         name: {
           bsonType: 'string',
           description: 'A name is required'
+        },
+        listeningHistory: {
+          bsonType: 'array'
         }
       }
     }

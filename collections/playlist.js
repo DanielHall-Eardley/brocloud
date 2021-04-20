@@ -1,5 +1,5 @@
 module.exports = {
-  name: 'playList',
+  name: 'playlist',
   validator: {
     $jsonSchema: {
       bsonType: 'object',

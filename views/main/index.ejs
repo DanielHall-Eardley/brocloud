@@ -8,10 +8,80 @@
   <link rel="stylesheet" href="/common/global.css">
   <title>Music</title>
 </head>
-<body>
+<body class="main--container">
+  <header>
+    <h1>BroCloud</h1>
+  </header>
+  <aside class="main--squad">
+    <h3>Squad</h3>
+    <ul class="main--squad-list">
+      <% members.forEach(member => { %>
+        <li>
+          <%= member.firstName %>
+          <%= ' ' %>
+          <q><%= member.nickName %></q>
+          <%= ' ' %>
+          <%= member.lastName %>
+          <% if (member.isActive) { %>
+            <span class='u--green-circle'></span>
+          <% } else { %>
+            <span class='u--red-circle'></span>
+          <% } %>
+        </li>
+      <% }); %>
+    </ul>
+  </aside>
   <main>
-    Music
+    <form class="main--search">
+      <input 
+        name="searchQuery" 
+        type="text" 
+        placeholder="Search for a song"
+      >
+      <button class="btn--primary">Search</button>
+    </form>
+    <section class="main--search-results">
+      <h3>Search results</h3>
+    </section>
+    <% if (currentlyPlaying.name) { %>
+      <section class="main--video">
+        <h3>Video</h3>
+      </section>
+      <section class="main--playlist">
+        <ul>
+          <h3>Currently playing</h3>
+          <li class="main--playing">
+            <%= currentlyPlaying.name %>
+            <%= ' chosen by ' %>
+            <%= currentlyPlaying.userFullName%>
+          </li>
+          <h3>Up Next</h3>
+          <% playlist.videoList.forEach(video => { %>
+            <li>
+              <%= video.name %>
+              <%= ' chosen by ' %>
+              <%= video.userFullName%>
+            </li>
+          <% }); %>
+        </ul>
+      </section>
+    <% } %>
   </main>
+  <aside class="main--history">
+    <h3>Listening History</h3>
+    <ul class="main--history-list">
+      <% history.forEach(video => { %>
+        <li>
+          <%= video.name %>
+          <%= ' chosen by ' %>
+          <%= video.userFullName %>
+          <span class="main--timestamp">
+            <%= video.timestamp %>
+          </span>
+        </li>
+      <% }); %>
+    </ul>
+  </aside>
 </body>
 <script src="/main/index.js"></script>
 </html>

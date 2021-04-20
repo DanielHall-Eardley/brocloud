@@ -9,11 +9,12 @@
   "author": "Daniel Hall-Eardley",
   "license": "ISC",
   "dependencies": {
-    "date-fns": "^2.20.1",
+    "date-fns": "^2.21.1",
     "ejs": "^3.1.6",
     "esbuild": "^0.11.8",
     "express": "^4.17.1",
     "mongodb": "^3.6.6",
+    "node-fetch": "^2.6.1",
     "socket.io": "^4.0.1"
   }
 }

@@ -209,7 +209,7 @@ function addToPlaylist (data) {
 function updatePlaylist (data) {
   const { currentlyPlaying, playlist, seconds} = data;
   const currentVideo = document.querySelector('.main--playing');
-  const oldChild = currentVideo.getElementsByTagName('li')[0];
+  currentVideo.innerText = '';
 
   const currentVideoName = document.createTextNode(currentlyPlaying.name); 
   const currentUserName = document.createTextNode(currentlyPlaying.userFullName); 
@@ -220,7 +220,7 @@ function updatePlaylist (data) {
   div.appendChild(currentUserName)
   li.appendChild(currentVideoName);
   li.appendChild(div)
-  currentVideo.replaceChild(li, oldChild);
+  currentVideo.appendChild(li);
 
   player.loadVideoById(currentlyPlaying.videoId, seconds);
   

@@ -1,44 +1,47 @@
 import { host, errorState } from './global.js';
-
-const request = async (url, options) => {
-    const res = await fetch(host + url, options)
-    if (res.status >= 200 && res.status <= 299) {
-      const data = await res.json()
-      return Promise.resolve(data)
-    }
-
-  errorState.updateError(res.error)
-}
-
 const user = JSON.parse(localStorage.getItem('user'))
 
-if (!user) {
-  errorState.updateError('Please login')
-}
-
-const { clubId, _id } = user
 const options = {
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `${_id} ${clubId}`
   },
   method: 'POST',
 }
 
+const request = async (url, body, method) => {
+  if (user) {
+    const { clubId, _id } = user;
+    options.headers.Authorization = `${_id} ${clubId}`;
+  }
+
+  if (body) {
+    options.body = JSON.stringify(body);
+  }
+
+  if (method) {
+    options.method = method
+  }
+  
+  const res = await fetch(host + url, options)
+  if (res.status >= 200 && res.status <= 299) {
+    const data = await res.json()
+    return Promise.resolve(data)
+  }
+
+  errorState.updateError(res.error)
+}
+
 export default {
   signup: async body => {
-    options.body = JSON.stringify(body);
-    const data = await request('/signup', options);
+    const data = await request('/signup', body);
     return Promise.resolve(data)
   },
   search: async body => {
-    options.body = JSON.stringify(body);
-    const data = await request('/search', options);
+    const data = await request('/search', body);
     return Promise.resolve(data)
   },
   addVideo: async body => {
-    options.body = JSON.stringify(body);
-    const data = await request('/addVideo', options);
+    const data = await request('/addVideo', body);
     return Promise.resolve(data)
   },
 };

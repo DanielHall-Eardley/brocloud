@@ -10,23 +10,24 @@
 </head>
 <body class="main--container">
   <header>
-    <h1>BroCloud</h1>
+    <h1 class="main-title">
+      <span>BroCloud</span> |
+      <span class="main--club-highlight">
+        <%= club.name %>
+      </span>
+    </h1>
   </header>
   <aside class="main--squad">
     <h3>Squad</h3>
     <ul class="main--squad-list">
       <% members.forEach(member => { %>
-        <li>
-          <%= member.firstName %>
-          <%= ' ' %>
-          <q><%= member.nickName %></q>
-          <%= ' ' %>
-          <%= member.lastName %>
-          <% if (member.isActive) { %>
-            <span class='u--green-circle'></span>
-          <% } else { %>
-            <span class='u--red-circle'></span>
-          <% } %>
+        <li id="<%= member._id %>" >
+          <span>
+            <%= member.firstName %>
+            <q> <%= member.nickName %></q>
+            <%= member.lastName %>
+          </span>
+          <span class="u--red-circle"></span>
         </li>
       <% }); %>
     </ul>
@@ -40,29 +41,44 @@
       >
       <button class="btn--primary">Search</button>
     </form>
-    <section class="main--search-results">
+    <section>
       <h3>Search results</h3>
+      <div class="main--search-results"></div>
     </section>
     <% if (currentlyPlaying.name) { %>
       <section class="main--video">
         <h3>Video</h3>
+        <div class="u--center-content">
+          <div id="player"></div>
+        </div>
       </section>
       <section class="main--playlist">
         <ul>
           <h3>Currently playing</h3>
-          <li class="main--playing">
-            <%= currentlyPlaying.name %>
-            <%= ' chosen by ' %>
-            <%= currentlyPlaying.userFullName%>
-          </li>
-          <h3>Up Next</h3>
-          <% playlist.videoList.forEach(video => { %>
+          <div class="main--playing">
             <li>
-              <%= video.name %>
-              <%= ' chosen by ' %>
-              <%= video.userFullName%>
+              <%= currentlyPlaying.name %>
+              <div class="main--name-highlight">
+                <%= currentlyPlaying.userFullName%>
+              </div>
+              <input 
+                type="hidden" 
+                id="videoId" 
+                value="<%= currentlyPlaying.videoId %>"
+              >
             </li>
-          <% }); %>
+          </div>
+          <h3>Up Next</h3>
+          <div class='main--up-next'>
+            <% playlist.forEach(video => { %>
+              <li>
+                <%= video.name %>
+                <div class="main--name-highlight">
+                  <%= video.userFullName%>
+                </div>
+              </li>
+            <% }); %>
+          </div>
         </ul>
       </section>
     <% } %>
@@ -71,17 +87,24 @@
     <h3>Listening History</h3>
     <ul class="main--history-list">
       <% history.forEach(video => { %>
-        <li>
-          <%= video.name %>
-          <%= ' chosen by ' %>
-          <%= video.userFullName %>
-          <span class="main--timestamp">
-            <%= video.timestamp %>
-          </span>
+        <li id="<%= video.videoId %>">
+          <button class="btn--result btn--history">
+            <p>
+              <%= video.name %>
+            </p>
+            <p>
+              <%= video.userFullName %>
+              <span class="main--timestamp">
+                | <%= video.timestamp %>
+              </span>
+            </p>
+          </button>
         </li>
       <% }); %>
     </ul>
   </aside>
 </body>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
 <script src="/main/index.js"></script>
 </html>

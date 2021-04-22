@@ -36,4 +36,4 @@ export const errorState = {
   getError() {
     return this.error
   }
-}
+};

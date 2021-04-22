@@ -10,9 +10,17 @@ const request = async (url, options) => {
   errorState.updateError(res.error)
 }
 
+const user = JSON.parse(localStorage.getItem('user'))
+
+if (!user) {
+  errorState.updateError('Please login')
+}
+
+const { clubId, _id } = user
 const options = {
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Authorization': `${_id} ${clubId}`
   },
   method: 'POST',
 }
@@ -26,6 +34,11 @@ export default {
   search: async body => {
     options.body = JSON.stringify(body);
     const data = await request('/search', options);
+    return Promise.resolve(data)
+  },
+  addVideo: async body => {
+    options.body = JSON.stringify(body);
+    const data = await request('/addVideo', options);
     return Promise.resolve(data)
   },
 };

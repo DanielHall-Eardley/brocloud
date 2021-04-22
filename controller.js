@@ -3,7 +3,11 @@ const catchError = require('./util/catchError');
 const throwError = require('./util/throwError');
 const { format, differenceInDays } = require('date-fns');
 const fetch = require('node-fetch');
-const { youtubeApiKey } = require('./keys')
+
+let youtubeApiKey = process.env.YOUTUBE_API_KEY  
+if (!youtubeApiKey) {
+  youtubeApiKey = require('./keys').youtubeApiKey
+}
 
 const formatTimestamp = (timestamp) => {
   const now = new Date();
@@ -54,6 +58,32 @@ const addDocument = async (db, newDoc) => {
   return response.ops[0];
 };
 
+const extractIds = req => {
+  const [userId, clubId] = req.get('Authorization').split(' ')
+  return {
+    userId,
+    clubId
+  }
+}
+
+const playlistRequest = (db, clubId) => {
+  return db.aggregate([
+    { $match: { clubId: new ObjectID(clubId) } },
+    { 
+      $lookup: {
+        from: 'video',
+        localField: 'upNext',
+        foreignField: '_id',
+        as: 'videoList'
+      }
+    }
+  ]).toArray();
+}
+
+exports.dbUtil = {
+  playlistRequest
+}
+
 exports.getSignup = catchError(async (req, res, next) => {
   const clubs = await findDocuments(Club);
   const data = {
@@ -72,7 +102,7 @@ exports.signup = catchError(async (req, res, next) => {
     clubName,
     clubId
   } = req.body;
-  console.log(req.body)
+
   let club = {};
   if (clubId && clubId !== 'null') {
     club._id = clubId;
@@ -101,8 +131,7 @@ exports.signup = catchError(async (req, res, next) => {
     firstName,
     lastName,
     nickName,
-    clubId: new ObjectID(club._id),
-    isActive: false
+    clubId: new ObjectID(club._id)
   };
 
   const savedUser = await addDocument(User, userDoc);
@@ -112,19 +141,9 @@ exports.signup = catchError(async (req, res, next) => {
 exports.getMusic = catchError(async (req, res, next) => {
   const { clubId } = req.params;
 
-  const userPromise = findDocuments(User, { clubId });
+  const userPromise = findDocuments(User, { clubId: new ObjectID(clubId) });
   const clubPromise = Club.findOne({ _id: new ObjectID(clubId) });
-  const playlistPromise = Playlist.aggregate([
-    { $match: { clubId: new ObjectID(clubId) } },
-    { 
-      $lookup: {
-        from: 'video',
-        localField: 'upNext',
-        foreignField: '_id',
-        as: 'videoList'
-      }
-    }
-  ]).toArray();
+  const playlistPromise = playlistRequest(Playlist, clubId)
 
   const [
     members, 
@@ -135,21 +154,22 @@ exports.getMusic = catchError(async (req, res, next) => {
     clubPromise,
     playlistPromise
   ]);
-  console.log(playlist)
+  
   const history = club.listeningHistory.map(video => {
     const timestamp = formatTimestamp(video.mostRecentlyPlayed)
 
     return {
+      videoId: video.videoId,
       name: video.name,
       userFullName: video.userFullName,
       timestamp
     }
   });
-  
+
   const data = {
     members,
     club,
-    playlist,
+    playlist: playlist[0].videoList,
     history,
     currentlyPlaying: playlist[0].currentlyPlaying
   };
@@ -161,7 +181,79 @@ exports.search = catchError(async (req, res, next) => {
   const url = `https://www.googleapis.com/youtube/v3/search?type=video&part=snippet&maxResults=3&q=${req.body.searchQuery}&key=${youtubeApiKey}&fields=items(id,snippet/title,snippet/thumbnails/default)&videoCategoryId=10`
   const response = await fetch(url);
   const results = await response.json();
-  console.log(results.items[0])
   res.status(200).json({ results });
+});
+
+exports.addVideo = catchError(async (req, res, next) => {
+  const auth = extractIds(req);
+
+  const { 
+    name,
+    videoId
+  } = req.body;
+
+  const userPromise = User.findOne({ _id: new ObjectID(auth.userId) });
+  const existingVideoPromise = Video.findOne({ videoId });
+  const playlistPromise = Playlist.findOne({ clubId: new ObjectID(auth.clubId) })
+  
+  const [
+    user, 
+    existingVideo,
+    playlist
+  ] = await Promise.all([
+    userPromise, 
+    existingVideoPromise,
+    playlistPromise
+  ]);
+
+  if (!user) {
+    throwError('You must be signed up to add songs');
+  }
+
+  //create video if none exists
+  let video;
+  if(existingVideo) {
+    video = existingVideo
+  } else {
+    const userFullName = `${user.firstName} \"${user.nickName}\" ${user.lastName}`;
+    const videoDoc = {
+      name,
+      videoId,
+      userFullName,
+      firstPlayed: new Date(),
+      mostRecentlyPlayed: new Date(),
+    };
+
+    video = await addDocument(Video, videoDoc);
+  }
+  /* 
+  Update the playlist by either pushing to
+  currently playing or pushing the end of the upNext queue 
+  */
+  const filter = { _id: new ObjectID(playlist._id) };
+  const update = {};
+  if (playlist.currentlyPlaying.name) {
+    update.$push = { upNext: new ObjectID(video._id) }
+  } else {
+    update.$set = {
+      currentlyPlaying: video
+    }; 
+  }
+
+  const updatedPlaylist = await Playlist.updateOne(filter, update);
+
+  if (updatedPlaylist.result.ok !== 1) {
+    throwError('Unable to add your song to the playlist')
+  }
+
+  // Aggregate the playlist to lookup videos from videoIds
+  const newPlaylist = await playlistRequest(Playlist, auth.clubId)
+
+  // Check if the new video has been added to queue
+  const last = newPlaylist[0].videoList.length - 1
+  res.status(200).json({ 
+    newVideo: newPlaylist[0].videoList[last],
+    currentlyPlaying: newPlaylist[0].currentlyPlaying
+  });
 });
 

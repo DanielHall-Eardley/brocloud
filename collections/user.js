@@ -26,9 +26,6 @@ module.exports = {
         clubId: {
           bsonType: 'objectId',
           description: 'Club id required'
-        },
-        isActive: {
-          bsonType: 'bool'
         }
       }
     }

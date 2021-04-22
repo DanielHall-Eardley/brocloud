@@ -5,9 +5,16 @@
   grid-template-rows: min-content 1fr;
   column-gap: 2rem;
   padding: 2rem;
+  background-color: var(--beige);
 }
 
-@media only screen and (max-width: 900px) {
+.main-title {
+  margin-top: 0;
+  font-size: 3rem;
+  color: var(--dark-green);
+}
+
+@media only screen and (max-width: 1000px) {
   .main--container {
     display: block;
   }
@@ -47,6 +54,21 @@ header {
   font-size: 1.8rem;
 }
 
+.main--squad {
+  height: min-content;
+}
+
+.main--squad-list {
+  font-size: 2rem;
+}
+
+.main--squad-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: .5rem;
+}
+
 .main--result-list li {
   width: 100%;
   font-size: 2rem;
@@ -57,4 +79,50 @@ header {
   height: 6rem;
   width: 3.5rem;
   margin-left: 1rem;
+}
+
+.main--playing, 
+.main--up-next li
+{
+  background-color: var(--dark-yellow);
+  font-size: 1.8rem;
+  padding: 1rem;
+  border-radius: 5px;
+  margin-bottom: 2rem;
+}
+
+.main--up-next li:nth-child(odd) {
+  background-color: var(--light-yellow);
+}
+
+.main--up-next li:nth-child(even) {
+  background-color: var(--beige);
+}
+
+.main--history li {
+  margin-bottom: 1rem;
+}
+
+.main--name-highlight {
+  color: var(--dark-green);
+  font-weight: bold;
+  margin-top: .4rem;
+}
+
+.main--history {
+  height: min-content;
+  font-size: 2rem;
+}
+
+.btn--history {
+  display: block !important;
+  text-align: left;
+}
+
+.btn--history p {
+  margin: .5rem;
+}
+
+.main--club-highlight {
+  color: var(--red);
 }

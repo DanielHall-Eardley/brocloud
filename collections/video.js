@@ -18,10 +18,10 @@ module.exports = {
           description: 'The song requestor\'s name is required'
         },
         firstPlayed: {
-          bsonType: 'timestamp',
+          bsonType: 'date',
         },
         mostRecentlyPlayed: {
-          bsonType: 'timestamp',
+          bsonType: 'date',
         }
       }
     }

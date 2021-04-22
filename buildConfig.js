@@ -13,7 +13,8 @@ esbuild.build({
   bundle: true,
   sourcemap: true,
   watch: true,
-  outdir: 'dist'
+  outdir: 'dist',
+  minify: true
 }).then(result => {
   result.stop()
 }).catch(error => {console.log(error)})

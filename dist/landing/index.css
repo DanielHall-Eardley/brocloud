@@ -1,13 +1,1 @@
-/* static/landing/index.css */
-.landing--main-title {
-  text-align: center;
-  font-size: 5rem;
-}
-.landing--img {
-  width: 60%;
-  border-radius: 10px;
-}
-.landing--subtitle {
-  color: var(--dark-green);
-  font-size: 3rem;
-}
+.landing--main-title{text-align:center;font-size:5rem}.landing--img{width:60%;border-radius:10px}.landing--subtitle{color:var(--dark-green);font-size:3rem}

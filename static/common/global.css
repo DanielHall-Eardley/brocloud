@@ -2,7 +2,7 @@
   --dark-green: #026670;
   --light-green: #9FEDD7; 
   --green: green;
-  --red: red;
+  --red: #eb345e;
   --light-yellow: #FEF9C7;
   --dark-yellow: #FCE181;
   --beige: #EDEAE5;
@@ -37,10 +37,13 @@ input, select {
   height: 3rem;
   font-size: 1.8rem;
   outline: none;
+  border: none;
+  background-color: var(--beige);
+  padding-left: 1rem;
 }
 
 :is(input, select):hover {
-  border: solid 1px var(--dark-green);
+  background-color: var(--light-green);
 }
 
 .btn--primary {
@@ -84,10 +87,11 @@ input, select {
   color: var(--green)
 }
 
-section, aside {
-  border: var(--border);
+section, aside, form {
+  box-shadow:  2px 2px 2px var(--gray);
   border-radius: 10px;
-  padding: 1rem
+  padding: 1.5rem;
+  background-color: var(--white);
 }
 
 h3 {
@@ -109,4 +113,19 @@ img {
   height: 100%;
   width: 100%;
   object-fit: cover;
+}
+
+.u--green-circle, .u--red-circle {
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.u--green-circle {
+  background-color: var(--green);
+}
+
+.u--red-circle {
+  background-color: var(--red);
 }

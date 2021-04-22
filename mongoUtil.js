@@ -11,6 +11,9 @@ const options = {
 module.exports = {
   connect: cb => {
     MongoClient.connect(uri, options, (err, client) => {
+      if (err) {
+        console.log(err)
+      }
       db = client.db('brocloud')
       // addCollections(db); 
       cb(err);

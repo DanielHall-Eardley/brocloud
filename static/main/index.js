@@ -32,8 +32,8 @@ function emitClubInfo () {
 }
 
 function onClubInfo () {
-  clubSocket.on('updatePlaylist', updatePlaylist);
   clubSocket.on('updateClubState', updateClubState)
+  clubSocket.on('updatePlaylist', updatePlaylist);
 }
 
 function updateClubState (club) {
@@ -176,7 +176,7 @@ function addToPlaylist (data) {
     if (oldChild) {
       currentVideo.innerText = '';
     }
-    
+
     const currentVideoName = document.createTextNode(currentlyPlaying.name); 
     const currentUserName = document.createTextNode(currentlyPlaying.userFullName); 
     

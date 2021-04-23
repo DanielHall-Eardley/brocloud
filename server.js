@@ -82,8 +82,7 @@ mongoUtil.connect((err) => {
               )
     
               if (userActive) {
-                socket.join(user.clubId);
-                return io.emit('updateClubState', existingClub)
+                return clubNs.emit('updateClubState', existingClub)
               }
     
               club = {
@@ -106,7 +105,6 @@ mongoUtil.connect((err) => {
           })
     
           socket.on('updateSeconds', data => {
-            console.log(data.seconds);
             const prevState = getState()
             if (prevState.clubs[data.clubId]) {
               const club = {

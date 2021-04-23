@@ -55,7 +55,6 @@ function emitSeconds (player, clubId) {
   intervalId = setInterval(() => {
     const data = {
       seconds: player.getCurrentTime(),
-      syncActive: true,
       clubId
     }
 
@@ -117,7 +116,7 @@ function onYouTubeIframeAPIReady(videoId, ellapsedSeconds, syncActive) {
 }
 
 function onPlayerReady (event, ellapsedSeconds, syncActive) {
-  event.target.setVolume(100);
+  event.target.setVolume(100)
   event.target.seekTo(ellapsedSeconds, true);
 
   /* 

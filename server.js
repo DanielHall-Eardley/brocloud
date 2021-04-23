@@ -100,7 +100,7 @@ mongoUtil.connect((err) => {
             const existingClub = prevState.clubs[data.clubId]
        
             if (!existingClub.syncActive) {
-              existingClub.syncActive = data.syncActive
+              existingClub.syncActive = true
             }
 
             const club = {

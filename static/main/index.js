@@ -39,29 +39,19 @@ function onClubInfo () {
 }
 
 function updateClubState (club) {
-    const clubId = user.clubId; 
-    const videoId = document.querySelector('#videoId')
-   
-    if (!videoId) {
-      clubSocket.emit('playNext', clubId);
-      return
-    }
-    console.log(club);
-    onYouTubeIframeAPIReady(videoId.value, club.ellapsedSeconds);
-    updateMembers(club.members);
-
-    /* 
-    check if someone is already emitting the
-    current song ellapsed seconds, if not this
-    user becomes the primary emitter for all
-    preceding users to sync to.
-    */
-    if (!club.syncActive) {
-      emitSeconds(player)
-    }  
+  const clubId = user.clubId; 
+  const videoId = document.querySelector('#videoId')
+  
+  if (!videoId) {
+    clubSocket.emit('playNext', clubId);
+    return
+  }
+  console.log(club);
+  onYouTubeIframeAPIReady(videoId.value, club.ellapsedSeconds);
+  updateMembers(club.members);
 }
 
-function emitSeconds (player) {
+function emitSeconds (player, clubId) {
   intervalId = setInterval(() => {
     const data = {
       seconds: player.getCurrentTime(),
@@ -128,6 +118,16 @@ function onYouTubeIframeAPIReady(videoId, ellapsedSeconds) {
 
 function onPlayerReady (event, ellapsedSeconds) {
   event.target.seekTo(ellapsedSeconds, true);
+
+  /* 
+    check if someone is already emitting the
+    current song ellapsed seconds, if not this
+    user becomes the primary emitter for all
+    preceding users to sync to.
+    */
+    if (!club.syncActive) {
+      emitSeconds(event.target, user.clubId)
+    }  
 }
 
 async function formSubmit (event) {

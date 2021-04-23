@@ -1,5 +1,5 @@
-export const host = 'http://localhost:3000';
-// export const host = 'https://bro-cloud.herokuapp.com';
+// export const host = 'http://localhost:3000';
+export const host = 'https://bro-cloud.herokuapp.com';
 
 export const FormState = class FormState {
   constructor () {

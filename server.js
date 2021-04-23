@@ -111,9 +111,8 @@ mongoUtil.connect((err) => {
                   [data.clubId]: club
                 }
               }
+              state.updateState(newState);
             }
-  
-            state.updateState(newState);
           })
           
           socket.on('playNext', async clubId => {

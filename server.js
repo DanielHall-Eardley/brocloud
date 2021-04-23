@@ -63,8 +63,7 @@ mongoUtil.connect((err) => {
             if (!existingClub) {
               club = {
                 members: [user._id],
-                ellapsedSeconds: 0,
-                syncActive: false,
+                ellapsedSeconds: 0
               };
             } else {
               const userActive = existingClub.members.some(
@@ -96,44 +95,19 @@ mongoUtil.connect((err) => {
           })
     
           socket.on('updateSync', data => {
-            const prevState = state.getState()
-            const existingClub = prevState.clubs[data.clubId]
-       
-            if (!existingClub.syncActive) {
-              existingClub.syncActive = true
-            }
+            const prevState = state.getState();
+            const existingClub = prevState.clubs[data.clubId];
 
             const club = {
               ...existingClub,
               ellapsedSeconds: data.seconds
             }
-  
+   
             const newState = {
               ...prevState,
               clubs: {
                 ...prevState.clubs,
                 [data.clubId]: club
-              }
-            }
-  
-            state.updateState(newState);
-          })
-
-          socket.on('stopSync', clubId => {
-            const prevState = state.getState()
-            const existingClub = prevState.clubs[clubId]
-         
-            const club = {
-              ...existingClub,
-              ellapsedSeconds: 0,
-              syncActive: false
-            }
-    
-            const newState = {
-              ...prevState,
-              clubs: {
-                ...prevState.clubs,
-                [clubId]: club
               }
             }
   

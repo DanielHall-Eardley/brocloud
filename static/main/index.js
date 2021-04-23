@@ -47,8 +47,8 @@ function updateClubState (club) {
     return
   }
   console.log(club);
-  onYouTubeIframeAPIReady(videoId.value, club.ellapsedSeconds, club.syncActive);
-  updateMembers(club.members);
+  onYouTubeIframeAPIReady(videoId.value, club.ellapsedSeconds, club.member[0]);
+  updateMembers(club.members); 
 }
 
 function emitSeconds (player, clubId) {
@@ -60,10 +60,6 @@ function emitSeconds (player, clubId) {
 
     clubSocket.emit('updateSync', data);
   }, 500)
-}
-
-function cancelEmitSeconds (intervalId) {
-  clearInterval(intervalId)
 }
 
 function addHistoryListeners () {
@@ -92,7 +88,7 @@ function updateMembers (members) {
   });
 }
 
-function onYouTubeIframeAPIReady(videoId, ellapsedSeconds, syncActive) {
+function onYouTubeIframeAPIReady(videoId, ellapsedSeconds, firstMember) {
   player = new YT.Player('player', {
     height: '300',
     width: '500',
@@ -107,27 +103,19 @@ function onYouTubeIframeAPIReady(videoId, ellapsedSeconds, syncActive) {
     },
     events: {
       onReady: event => {
-        onPlayerReady(event, ellapsedSeconds, syncActive)
+        onPlayerReady(event, ellapsedSeconds)
       },
-      onStateChange: onPlayerStateChange,
+      onStateChange: event => {
+        onPlayerStateChange(event, firstMember)
+      },
       onError: onPlayerError
     }
   });
 }
 
-function onPlayerReady (event, ellapsedSeconds, syncActive) {
+function onPlayerReady (event, ellapsedSeconds) {
   event.target.setVolume(100)
   event.target.seekTo(ellapsedSeconds, true);
-
-  /* 
-    check if someone is already emitting the
-    current song ellapsed seconds, if not this
-    user becomes the primary emitter for all
-    preceding users to sync to.
-    */
-    if (!syncActive) {
-      emitSeconds(event.target, user.clubId)
-    }  
 }
 
 async function formSubmit (event) {
@@ -191,7 +179,6 @@ function addToPlaylist (data) {
   const { 
     currentlyPlaying, 
     queuedVideo,
-    syncActive,
     ellapsedSeconds
    } = data;
   
@@ -221,9 +208,6 @@ function addToPlaylist (data) {
     currentVideo.appendChild(li);
 
     player.loadVideoById(currentlyPlaying.videoId, ellapsedSeconds);
-    if (!syncActive) {
-      emitSeconds(player, user.clubId);
-    }
   }
   
   if (queuedVideo) {
@@ -243,8 +227,7 @@ function addToPlaylist (data) {
 
 function updatePlaylist (data) {
   if (data.empty) {
-    cancelEmitSeconds(intervalId);
-    return clubSocket.emit('stopSync', user.clubId);
+    return clearInterval(intervalId);
   }
 
   const { 
@@ -266,8 +249,8 @@ function updatePlaylist (data) {
   li.appendChild(div)
   currentVideo.appendChild(li);
 
-  player.seekTo(ellapsedSeconds, true);
-  player.cueVideoById(playlist[0].videoId);
+  player.loadVideoById(currentVideo.videoId, ellapsedSeconds);
+
   const upNext = document.querySelector('.main--up-next');
   upNext.innerText = ""
 
@@ -285,15 +268,22 @@ function updatePlaylist (data) {
   })
 }
 
-async function onPlayerStateChange(event) {
+async function onPlayerStateChange(event, firstMember) {
   const upNext = document.querySelector('.main--up-next');
   const videoCount = upNext.getElementsByTagName('li').length
   if(event.data === YT.PlayerState.ENDED && videoCount > 0) {
     clubSocket.emit('playNext', user.clubId);
+    clearInterval(intervalId);
   }
 
   if(event.data === YT.PlayerState.PAUSED && videoCount > 0) {
     event.target.playVideo()
+  }
+
+  if(event.data === YT.PlayerState.PLAYING && videoCount > 0) {
+    if (user._id === firstMember) {
+      emitSeconds(event.target, user.clubId);
+    }
   }
 }
 

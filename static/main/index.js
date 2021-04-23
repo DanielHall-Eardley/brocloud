@@ -297,6 +297,12 @@ function onPlayerStateChange(event) {
 
   if(event.data === YT.PlayerState.PLAYING) {
     emitSeconds();
+    clubSocket.on('syncTrack', position => {
+      const roundCurrentPosition = Math.round(event.target.getCurrentTime() * 10) / 10
+      if (position > roundCurrentPosition) {
+        event.target.seekTo(position, true)
+      }
+    })
   }
 }
 

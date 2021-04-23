@@ -47,7 +47,7 @@ function updateClubState (club) {
     return
   }
   console.log(club);
-  onYouTubeIframeAPIReady(videoId.value, club.ellapsedSeconds);
+  onYouTubeIframeAPIReady(videoId.value, club.ellapsedSeconds, club.syncActive);
   updateMembers(club.members);
 }
 
@@ -93,7 +93,7 @@ function updateMembers (members) {
   });
 }
 
-function onYouTubeIframeAPIReady(videoId, ellapsedSeconds) {
+function onYouTubeIframeAPIReady(videoId, ellapsedSeconds, syncActive) {
   player = new YT.Player('player', {
     height: '300',
     width: '500',
@@ -108,7 +108,7 @@ function onYouTubeIframeAPIReady(videoId, ellapsedSeconds) {
     },
     events: {
       onReady: event => {
-        onPlayerReady(event, ellapsedSeconds)
+        onPlayerReady(event, ellapsedSeconds, syncActive)
       },
       onStateChange: onPlayerStateChange,
       onError: onPlayerError
@@ -116,7 +116,7 @@ function onYouTubeIframeAPIReady(videoId, ellapsedSeconds) {
   });
 }
 
-function onPlayerReady (event, ellapsedSeconds) {
+function onPlayerReady (event, ellapsedSeconds, syncActive) {
   event.target.seekTo(ellapsedSeconds, true);
 
   /* 
@@ -125,7 +125,7 @@ function onPlayerReady (event, ellapsedSeconds) {
     user becomes the primary emitter for all
     preceding users to sync to.
     */
-    if (!club.syncActive) {
+    if (!syncActive) {
       emitSeconds(event.target, user.clubId)
     }  
 }

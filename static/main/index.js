@@ -121,9 +121,8 @@ async function formSubmit (event) {
 
 function addVideoListener (btn, ul, name, videoId) {
   btn.addEventListener('click', async (event) => {
-    console.log(videoId, name)
     /* if video is from search results, 
-    clear searchresults */
+    clear search results */
     if (ul) {
       ul.innerText = "";
     }
@@ -168,10 +167,10 @@ function createResultList (data) {
 }
 
 function addToPlaylist (data) {
-  const { currentlyPlaying, newVideo } = data;
+  const { currentlyPlaying, queuedVideo } = data;
   
-  if (!newVideo && currentlyPlaying.videoId) {
-    const currentVideo = document.querySelector('.main--playing');
+  if (!queuedVideo && currentlyPlaying.videoId) {
+    let currentVideo = document.querySelector('.main--playing');
     const oldChild = currentVideo.getElementsByTagName('li')[0];
     const currentVideoName = document.createTextNode(currentlyPlaying.name); 
     const currentUserName = document.createTextNode(currentlyPlaying.userFullName); 
@@ -191,10 +190,10 @@ function addToPlaylist (data) {
     currentVideo.replaceChild(li, oldChild);
   }
   
-  if (newVideo) {
+  if (queuedVideo) {
     const upNext = document.querySelector('.main--up-next');
-    const videoName = document.createTextNode(newVideo.name); 
-    const userName = document.createTextNode(newVideo.userFullName); 
+    const videoName = document.createTextNode(queuedVideo.name); 
+    const userName = document.createTextNode(queuedVideo.userFullName); 
      
     const li = document.createElement('li');
     const div = document.createElement('div');
@@ -208,7 +207,7 @@ function addToPlaylist (data) {
 
 function updatePlaylist (data) {
   const { currentlyPlaying, playlist, seconds} = data;
-  const currentVideo = document.querySelector('.main--playing');
+  let currentVideo = document.querySelector('.main--playing');
   currentVideo.innerText = '';
 
   const currentVideoName = document.createTextNode(currentlyPlaying.name); 

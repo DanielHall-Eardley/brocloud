@@ -15,6 +15,7 @@
       <span class="main--club-highlight">
         <%= club.name %>
       </span>
+      <p class="error"></p>
     </h1>
   </header>
   <aside class="main--squad">
@@ -45,17 +46,17 @@
       <h3>Search results</h3>
       <div class="main--search-results"></div>
     </section>
-    <% if (currentlyPlaying.name) { %>
-      <section class="main--video">
-        <h3>Video</h3>
-        <div class="u--center-content">
-          <div id="player"></div>
-        </div>
-      </section>
-      <section class="main--playlist">
-        <ul>
-          <h3>Currently playing</h3>
-          <div class="main--playing">
+    <section class="main--video">
+      <h3>Video</h3>
+      <div class="u--center-content">
+        <div id="player"></div>
+      </div>
+    </section>
+    <section class="main--playlist">
+      <ul>
+        <h3>Currently playing</h3>
+        <div class="main--playing">
+          <% if (currentlyPlaying.name) { %>
             <li>
               <%= currentlyPlaying.name %>
               <div class="main--name-highlight">
@@ -67,21 +68,21 @@
                 value="<%= currentlyPlaying.videoId %>"
               >
             </li>
-          </div>
-          <h3>Up Next</h3>
-          <div class='main--up-next'>
-            <% playlist.forEach(video => { %>
-              <li>
-                <%= video.name %>
-                <div class="main--name-highlight">
-                  <%= video.userFullName%>
-                </div>
-              </li>
-            <% }); %>
-          </div>
-        </ul>
-      </section>
-    <% } %>
+          <% } %>
+        </div>
+        <h3>Up Next</h3>
+        <div class='main--up-next'>
+          <% playlist.forEach(video => { %>
+            <li>
+              <%= video.name %>
+              <div class="main--name-highlight">
+                <%= video.userFullName%>
+              </div>
+            </li>
+          <% }); %>
+        </div>
+      </ul>
+    </section>
   </main>
   <aside class="main--history">
     <h3>Listening History</h3>

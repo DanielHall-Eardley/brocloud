@@ -3,7 +3,6 @@ import api from '../common/api';
 const formState = new FormState()
 
 window.onload = () => {
-  console.log('f')
   const form = document.querySelector('.signup--form');
   formState.init(form);
   form.addEventListener('submit', formSubmit);

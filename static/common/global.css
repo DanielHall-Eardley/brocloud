@@ -129,3 +129,10 @@ img {
 .u--red-circle {
   background-color: var(--red);
 }
+
+.error {
+  background-color: var(--light-yellow);
+  color: var(--red);
+  border-radius: 10px;
+  margin-top: 0;
+}

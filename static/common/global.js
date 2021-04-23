@@ -33,6 +33,9 @@ export const errorState = {
   error: null,
   updateError(error) {
     this.error = error
+    const errorNotif = document.querySelector('.error');
+    const errorMessage = document.createTextNode(error);
+    errorNotif.appendChild(errorMessage)
   },
   getError() {
     return this.error

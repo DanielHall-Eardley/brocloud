@@ -129,7 +129,8 @@ mongoUtil.connect((err) => {
           socket.on('playNext', async clubId => {
             const club = await Club.findOne({ _id: new ObjectID(clubId) });
             const playlist = await Playlist.findOne({ clubId: new ObjectID(clubId) });
-    
+            
+            if (playlist.upNext.length < 1) return
             /* 
             Move played video to club's listening history,
             remove the video id for the next video from the

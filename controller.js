@@ -232,7 +232,7 @@ exports.addVideo = catchError(async (req, res, next) => {
   */
   const filter = { _id: new ObjectID(playlist._id) };
   const update = {};
-  if (playlist.currentlyPlaying.name) {
+  if (playlist.currentlyPlaying && playlist.currentlyPlaying.name) {
     update.$push = { upNext: new ObjectID(video._id) }
   } else {
     update.$set = {
@@ -252,7 +252,7 @@ exports.addVideo = catchError(async (req, res, next) => {
   // Check if the new video has been added to queue
   const last = newPlaylist[0].videoList.length - 1
   res.status(200).json({ 
-    newVideo: newPlaylist[0].videoList[last],
+    queuedVideo: newPlaylist[0].videoList[last],
     currentlyPlaying: newPlaylist[0].currentlyPlaying
   });
 });

@@ -37,17 +37,7 @@ mongoUtil.connect((err) => {
 
     /****** Socket ******/
 
-    /***  clubState ****/
-    /* id {
-          members: [],
-          ellapsedSeconds: 0,
-          syncActive,
-        }
-    */
-
-   
     const state = require('./appState');
-   
     const options = {}
     const io = require('socket.io')(server, options)
     const db = mongoUtil.getDb();
@@ -100,8 +90,8 @@ mongoUtil.connect((err) => {
             }
     
             state.updateState(newState);
-            const newState = state.getState();
-            const updatedClub = newState.clubs[user.clubId];
+            const updatedState = state.getState();
+            const updatedClub = updatedState.clubs[user.clubId];
             clubNs.emit('updateClubState', updatedClub)
           })
     
@@ -229,9 +219,9 @@ mongoUtil.connect((err) => {
               updateClubPromise
             ])
     
-            const data = await playlistRequest(Playlist, club._id, )
+            const data = await playlistRequest(Playlist, club._id)
     
-            const updatedPlaylist ={ 
+            const updatedPlaylist = { 
               playlist: data[0].videoList,
               currentlyPlaying: data[0].currentlyPlaying,
               seconds: state.getState().clubs[club._id].ellapsedSeconds

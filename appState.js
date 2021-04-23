@@ -1,5 +1,8 @@
-module.exports = (initState = {}) => {
-  let state = initState;
+module.exports = (initState) => {
+  let state;
+  if (initState) {
+    state = initState;
+  }
 
   const getState = () => state;
   const updateState = newState => {

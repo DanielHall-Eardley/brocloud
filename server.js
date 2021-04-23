@@ -41,6 +41,7 @@ mongoUtil.connect((err) => {
     /* id {
           members: [],
           ellapsedSeconds: 0,
+          syncActive,
         }
     */
 
@@ -74,7 +75,8 @@ mongoUtil.connect((err) => {
             if (!existingClub) {
               club = {
                 members: [user._id],
-                ellapsedSeconds: 0
+                ellapsedSeconds: 0,
+                syncActive: false,
               };
             } else {
               const userActive = existingClub.members.some(
@@ -104,11 +106,16 @@ mongoUtil.connect((err) => {
             clubNs.emit('updateClubState', updatedClub)
           })
     
-          socket.on('updateSeconds', data => {
+          socket.on('updateSync', data => {
             const prevState = getState()
-            if (prevState.clubs[data.clubId]) {
+            const existingClub = prevState.clubs[data.clubId]
+            if (existingClub) {
+              if (!existingClub.syncActive) {
+                existingClub.syncActive = data.syncActive
+              }
+
               const club = {
-                members: prevState.clubs[data.clubId].members,
+                ...existingClub,
                 ellapsedSeconds: data.seconds
               }
     
@@ -123,12 +130,49 @@ mongoUtil.connect((err) => {
               updateState(newState);
             }
           })
+
+          socket.on('stopSync', data => {
+            const prevState = getState()
+            const existingClub = prevState.clubs[data.clubId]
+         
+            const club = {
+              ...existingClub,
+              ellapsedSeconds: 0,
+              syncActive: false
+            }
     
+            const newState = {
+              ...prevState,
+              clubs: {
+                ...prevState.clubs,
+                [data.clubId]: club
+              }
+            }
+  
+            updateState(newState);
+          })
+          
           socket.on('playNext', async clubId => {
+            const prevState = getState();
+            const existingClub = prevState.clubs[club._id];
+
+            const newClub = {
+              ...existingClub,
+              ellapsedSeconds = 0
+            }
+
+            const newState = {
+              ...prevState,
+              clubs: {
+                ...prevState.clubs,
+                [club._id]: newClub
+              }
+            }
+    
+            updateState(newState);
             const club = await Club.findOne({ _id: new ObjectID(clubId) });
             const playlist = await Playlist.findOne({ clubId: new ObjectID(clubId) });
             
-            if (playlist.upNext.length < 1) return
             /* 
             Move played video to club's listening history,
             remove the video id for the next video from the
@@ -137,8 +181,36 @@ mongoUtil.connect((err) => {
             */
             const played = playlist.currentlyPlaying;
             const newVideoId = playlist.upNext.shift()
+
+            if (!newVideoId) {
+              Playlist.updateOne(
+                { _id: new ObjectId(playlist._id) },
+                {
+                  $set: { currentlyPlaying: {} },
+                }
+              )
+
+              const updateClubPromise =  Club.updateOne(
+                { _id: new ObjectId(club._id) },
+                {
+                  $push: { listeningHistory: played },
+                }
+              )
+      
+              await Promise.all([
+                updatePlaylistPromise,
+                updateClubPromise
+              ])
+
+              const updatedPlaylist = { 
+                empty: true
+              }
+      
+              return clubNs.emit('updatePlaylist', updatedPlaylist)
+            }
+
             const newVideo = await Video.findOne({ _id: new ObjectID(newVideoId) });
-         
+            
             const updatePlaylistPromise = Playlist.updateOne(
               { _id: new ObjectId(playlist._id) },
               {
@@ -154,29 +226,12 @@ mongoUtil.connect((err) => {
               }
             )
     
-            const [
-              playlistRes, clubRes
-            ] = await Promise.all([
+            await Promise.all([
               updatePlaylistPromise,
               updateClubPromise
             ])
     
-            const prevState = getState()
-            const newClub = {
-              members: prevState.clubs[club._id].members,
-              ellapsedSeconds: 0
-            }
-    
-            const newState = {
-              ...prevState,
-              clubs: {
-                ...prevState.clubs,
-                [club._id]: newClub
-              }
-            }
-    
-            updateState(newState);
-            const data = await playlistRequest(Playlist, club._id)
+            const data = await playlistRequest(Playlist, club._id, )
     
             const updatedPlaylist ={ 
               playlist: data[0].videoList,

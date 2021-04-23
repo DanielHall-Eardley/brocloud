@@ -3,8 +3,9 @@ import api from '../common/api';
 const formState = new FormState()
 
 let player;
-let mainSocket
-let clubSocket
+let mainSocket;
+let clubSocket;
+let intervalId;
 const user = JSON.parse(localStorage.getItem('user'));
 
 window.onload = () => {
@@ -34,10 +35,10 @@ function emitClubInfo () {
 function onClubInfo () {
   clubSocket.on('updateClubState', updateClubState)
   clubSocket.on('updatePlaylist', updatePlaylist);
+  clubSocket.on('stopSync', cancelEmitSeconds)
 }
 
 function updateClubState (club) {
-  const userId = user._id;
     const clubId = user.clubId; 
     const videoId = document.querySelector('#videoId')
    
@@ -45,20 +46,35 @@ function updateClubState (club) {
       clubSocket.emit('playNext', clubId);
       return
     }
-
+    console.log(club);
     onYouTubeIframeAPIReady(videoId.value, club.ellapsedSeconds);
     updateMembers(club.members);
 
-    if (userId === club.members[0]) {
-      setInterval(() => {
-        const data = {
-          seconds: player.getCurrentTime(),
-          clubId
-        }
+    /* 
+    check if someone is already emitting the
+    current song ellapsed seconds, if not this
+    user becomes the primary emitter for all
+    preceding users to sync to.
+    */
+    if (!club.syncActive) {
+      emitSeconds(player)
+    }  
+}
 
-        clubSocket.emit('updateSeconds', data);
-      }, 1000)
+function emitSeconds (player) {
+  intervalId = setInterval(() => {
+    const data = {
+      seconds: player.getCurrentTime(),
+      syncActive: intervalId,
+      clubId
     }
+
+    clubSocket.emit('updateSync', data);
+  }, 1000)
+}
+
+function cancelEmitSeconds (intervalId) {
+  clearInterval(intervalId)
 }
 
 function addHistoryListeners () {
@@ -94,19 +110,24 @@ function onYouTubeIframeAPIReady(videoId, ellapsedSeconds) {
     videoId: videoId,
     playerVars: {
       cc_load_policy: 0,
-      autoplay: 1,
       controls: 0,
       disablekb: 1,
       enablejsapi: 1,
       fs: 0,
       modestbranding: 1,
-      start: ellapsedSeconds
     },
     events: {
+      onReady: event => {
+        onPlayerReady(event, ellapsedSeconds)
+      },
       onStateChange: onPlayerStateChange,
       onError: onPlayerError
     }
   });
+}
+
+function onPlayerReady (event, ellapsedSeconds) {
+  event.target.seekTo(ellapsedSeconds, true);
 }
 
 async function formSubmit (event) {
@@ -167,7 +188,12 @@ function createResultList (data) {
 }
 
 function addToPlaylist (data) {
-  const { currentlyPlaying, queuedVideo } = data;
+  const { 
+    currentlyPlaying, 
+    queuedVideo,
+    syncActive,
+    ellapsedSeconds
+   } = data;
   
   if (!queuedVideo && currentlyPlaying.videoId) {
     let currentVideo = document.querySelector('.main--playing');
@@ -187,12 +213,17 @@ function addToPlaylist (data) {
     input.setAttribute('id', 'videoId');
     input.setAttribute('type', 'hidden');
     
-    div.className="main--name-highlight"
-    div.appendChild(currentUserName)
+    div.className="main--name-highlight";
+    div.appendChild(currentUserName);
     li.appendChild(currentVideoName);
-    li.appendChild(div)
-    li.appendChild(input)
+    li.appendChild(div);
+    li.appendChild(input);
     currentVideo.appendChild(li);
+
+    player.loadVideoById(currentlyPlaying.videoId, ellapsedSeconds);
+    if (!syncActive) {
+      emitSeconds(player);
+    }
   }
   
   if (queuedVideo) {
@@ -211,7 +242,16 @@ function addToPlaylist (data) {
 }
 
 function updatePlaylist (data) {
-  const { currentlyPlaying, playlist, seconds} = data;
+  if (data.empty) {
+    cancelEmitSeconds(intervalId);
+    clubSocket.emit('stopSync', user.clubId);
+  }
+
+  const { 
+    currentlyPlaying, 
+    playlist, 
+    ellapsedSeconds,
+  } = data;
   let currentVideo = document.querySelector('.main--playing');
   currentVideo.innerText = '';
 
@@ -226,10 +266,11 @@ function updatePlaylist (data) {
   li.appendChild(div)
   currentVideo.appendChild(li);
 
-  player.loadVideoById(currentlyPlaying.videoId, seconds);
-  
+  player.seekTo(ellapsedSeconds, true);
+  player.cueVideoById(playlist[0].videoId);
   const upNext = document.querySelector('.main--up-next');
   upNext.innerText = ""
+
   playlist.forEach(video => {
     const videoName = document.createTextNode(video.name); 
     const userName = document.createTextNode(video.userFullName); 
@@ -249,6 +290,10 @@ async function onPlayerStateChange(event) {
   const videoCount = upNext.getElementsByTagName('li').length
   if(event.data === YT.PlayerState.ENDED && videoCount > 0) {
     clubSocket.emit('playNext', user.clubId);
+  }
+
+  if(event.data === YT.PlayerState.PAUSED && videoCount > 0) {
+    event.target.playVideo()
   }
 }
 

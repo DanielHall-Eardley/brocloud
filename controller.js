@@ -157,16 +157,19 @@ exports.getMusic = catchError(async (req, res, next) => {
     playlistPromise
   ]);
   
-  const history = club.listeningHistory.map(video => {
-    const timestamp = formatTimestamp(video.mostRecentlyPlayed)
-
-    return {
-      videoId: video.videoId,
-      name: video.name,
-      userFullName: video.userFullName,
-      timestamp
-    }
+  const history;
+    club.listeningHistory.forEach(video => {
+      if (video && video._id) {
+        timestamp = formatTimestamp(video.mostRecentlyPlayed)
+        history.push({
+          videoId: video.videoId,
+          name: video.name,
+          userFullName: video.userFullName,
+          timestamp
+        })
+      }
   });
+  
 
   const data = {
     members,

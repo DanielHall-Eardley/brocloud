@@ -76,7 +76,7 @@ function emitSeconds () {
     }
 
     clubSocket.emit('updateSync', data);
-  }, 500)
+  }, 100)
 }
 
 function addHistoryListeners () {

@@ -45,12 +45,10 @@ mongoUtil.connect((err) => {
         }
     */
 
+   
+    const state = require('./appState');
+   
     const options = {}
-    const intialState = {
-      clubs: {}
-    }
-
-    const [getState, updateState] = require('./appState')(intialState)
     const io = require('socket.io')(server, options)
     const db = mongoUtil.getDb();
     const { ObjectID, ObjectId } = require('mongodb');
@@ -68,7 +66,7 @@ mongoUtil.connect((err) => {
           socket.on('setUpClub', async userId => {
             const query = { _id: new ObjectID(userId)};
             const user = await User.findOne(query);
-            const prevState = getState()
+            const prevState = state.getState()
             
             let club; 
             const existingClub = prevState.clubs[user.clubId]
@@ -101,13 +99,14 @@ mongoUtil.connect((err) => {
               }
             }
     
-            updateState(newState);
-            const updatedClub = getState().clubs[user.clubId]
+            state.updateState(newState);
+            const newState = state.getState();
+            const updatedClub = newState.clubs[user.clubId];
             clubNs.emit('updateClubState', updatedClub)
           })
     
           socket.on('updateSync', data => {
-            const prevState = getState()
+            const prevState = state.getState()
             const existingClub = prevState.clubs[data.clubId]
        
             if (!existingClub.syncActive) {
@@ -127,11 +126,11 @@ mongoUtil.connect((err) => {
               }
             }
   
-            updateState(newState);
+            state.updateState(newState);
           })
 
           socket.on('stopSync', clubId => {
-            const prevState = getState()
+            const prevState = state.getState()
             const existingClub = prevState.clubs[clubId]
          
             const club = {
@@ -148,11 +147,11 @@ mongoUtil.connect((err) => {
               }
             }
   
-            updateState(newState);
+            state.updateState(newState);
           })
           
           socket.on('playNext', async clubId => {
-            const prevState = getState();
+            const prevState = state.getState();
             const existingClub = prevState.clubs[clubId];
 
             const newClub = {
@@ -168,7 +167,7 @@ mongoUtil.connect((err) => {
               }
             }
     
-            updateState(newState);
+            state.updateState(newState);
             const club = await Club.findOne({ _id: new ObjectID(clubId) });
             const playlist = await Playlist.findOne({ clubId: new ObjectID(clubId) });
             
@@ -235,7 +234,7 @@ mongoUtil.connect((err) => {
             const updatedPlaylist ={ 
               playlist: data[0].videoList,
               currentlyPlaying: data[0].currentlyPlaying,
-              seconds: getState().clubs[club._id].ellapsedSeconds
+              seconds: state.getState().clubs[club._id].ellapsedSeconds
             }
             console.log(updatePlaylist)
             clubNs.emit('updatePlaylist', updatedPlaylist)

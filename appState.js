@@ -1,13 +1,17 @@
-module.exports = (initState) => {
-  let state;
-  if (initState) {
+const AppState = class AppState {
+  constructor (initState = {}) {
     state = initState;
   }
 
-  const getState = () => state;
-  const updateState = newState => {
-    state = newState
+  getState() {
+    return this.state
   }
 
-  return [getState, updateState]
+  updateState = newState => {
+    this.state = newState
+  }
 }
+
+module.exports = new AppState ({
+  clubs: {}
+})

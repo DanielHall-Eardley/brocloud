@@ -244,7 +244,7 @@ function addToPlaylist (data) {
 function updatePlaylist (data) {
   if (data.empty) {
     cancelEmitSeconds(intervalId);
-    clubSocket.emit('stopSync', user.clubId);
+    return clubSocket.emit('stopSync', user.clubId);
   }
 
   const { 

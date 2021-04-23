@@ -109,31 +109,30 @@ mongoUtil.connect((err) => {
           socket.on('updateSync', data => {
             const prevState = getState()
             const existingClub = prevState.clubs[data.clubId]
-            if (existingClub) {
-              if (!existingClub.syncActive) {
-                existingClub.syncActive = data.syncActive
-              }
-
-              const club = {
-                ...existingClub,
-                ellapsedSeconds: data.seconds
-              }
-    
-              const newState = {
-                ...prevState,
-                clubs: {
-                  ...prevState.clubs,
-                  [data.clubId]: club
-                }
-              }
-    
-              updateState(newState);
+       
+            if (!existingClub.syncActive) {
+              existingClub.syncActive = data.syncActive
             }
+
+            const club = {
+              ...existingClub,
+              ellapsedSeconds: data.seconds
+            }
+  
+            const newState = {
+              ...prevState,
+              clubs: {
+                ...prevState.clubs,
+                [data.clubId]: club
+              }
+            }
+  
+            updateState(newState);
           })
 
-          socket.on('stopSync', data => {
+          socket.on('stopSync', clubId => {
             const prevState = getState()
-            const existingClub = prevState.clubs[data.clubId]
+            const existingClub = prevState.clubs[clubId]
          
             const club = {
               ...existingClub,
@@ -145,7 +144,7 @@ mongoUtil.connect((err) => {
               ...prevState,
               clubs: {
                 ...prevState.clubs,
-                [data.clubId]: club
+                [clubId]: club
               }
             }
   
@@ -154,7 +153,7 @@ mongoUtil.connect((err) => {
           
           socket.on('playNext', async clubId => {
             const prevState = getState();
-            const existingClub = prevState.clubs[club._id];
+            const existingClub = prevState.clubs[clubId];
 
             const newClub = {
               ...existingClub,
@@ -165,7 +164,7 @@ mongoUtil.connect((err) => {
               ...prevState,
               clubs: {
                 ...prevState.clubs,
-                [club._id]: newClub
+                [clubId]: newClub
               }
             }
     

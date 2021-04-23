@@ -55,7 +55,7 @@ function emitSeconds (player, clubId) {
   intervalId = setInterval(() => {
     const data = {
       seconds: player.getCurrentTime(),
-      syncActive: intervalId,
+      syncActive: true,
       clubId
     }
 
@@ -222,7 +222,7 @@ function addToPlaylist (data) {
 
     player.loadVideoById(currentlyPlaying.videoId, ellapsedSeconds);
     if (!syncActive) {
-      emitSeconds(player);
+      emitSeconds(player, user.clubId);
     }
   }
   

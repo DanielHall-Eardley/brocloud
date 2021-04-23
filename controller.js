@@ -255,9 +255,9 @@ exports.addVideo = catchError(async (req, res, next) => {
   const newPlaylist = await playlistRequest(Playlist, auth.clubId)
 
   // Check if the new video has been added to queue
-  const last = newPlaylist[0].videoList.length - 1
+  const last = newPlaylist[0].videoList.length - 1;
+  const state = state.getState();
   const clubState = state.clubs[auth.clubId]
-
   res.status(200).json({ 
     queuedVideo: newPlaylist[0].videoList[last],
     currentlyPlaying: newPlaylist[0].currentlyPlaying,

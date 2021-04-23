@@ -172,6 +172,11 @@ function addToPlaylist (data) {
   if (!queuedVideo && currentlyPlaying.videoId) {
     let currentVideo = document.querySelector('.main--playing');
     const oldChild = currentVideo.getElementsByTagName('li')[0];
+    
+    if (oldChild) {
+      currentVideo.innerText = '';
+    }
+    
     const currentVideoName = document.createTextNode(currentlyPlaying.name); 
     const currentUserName = document.createTextNode(currentlyPlaying.userFullName); 
     
@@ -187,7 +192,7 @@ function addToPlaylist (data) {
     li.appendChild(currentVideoName);
     li.appendChild(div)
     li.appendChild(input)
-    currentVideo.replaceChild(li, oldChild);
+    currentVideo.appendChild(li);
   }
   
   if (queuedVideo) {

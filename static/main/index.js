@@ -7,6 +7,7 @@ let mainSocket;
 let clubSocket;
 let intervalId;
 const user = JSON.parse(localStorage.getItem('user'));
+let trackPosition = 0;
 
 function onYouTubeIframeAPIReady() {
   const options = {
@@ -76,7 +77,7 @@ function emitSeconds () {
     }
 
     clubSocket.emit('updateSync', data);
-  }, 100)
+  }, 500)
 }
 
 function addHistoryListeners () {
@@ -115,7 +116,12 @@ function initSocket () {
     const clubId = user.clubId;
     clubSocket.emit('pageClose', {userId, clubId})
   });
+  clubSocket.on('syncTrack', updateTrackPosition)
   console.log('Initialized socket listeners');
+}
+
+function updateTrackPosition (position) {
+  trackPosition = Math.round(position * 10) / 10
 }
 
 function onPlayerReady (event) {
@@ -297,12 +303,10 @@ function onPlayerStateChange(event) {
 
   if(event.data === YT.PlayerState.PLAYING) {
     emitSeconds();
-    clubSocket.on('syncTrack', position => {
-      const roundCurrentPosition = Math.round(event.target.getCurrentTime() * 10) / 10
-      if (position > roundCurrentPosition) {
-        event.target.seekTo(position, true)
-      }
-    })
+    const roundCurrentPosition = Math.round(event.target.getCurrentTime() * 10) / 10
+    if (trackPosition > roundCurrentPosition) {
+      event.target.seekTo(trackPosition, true)
+    }
   }
 }
 

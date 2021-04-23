@@ -98,10 +98,9 @@ mongoUtil.connect((err) => {
             const prevState = state.getState();
             const existingClub = prevState.clubs[data.clubId];
             const roundSeconds = Math.round(data.currentPosition * 10) / 10
-            if (
-              existingClub && 
-              roundSeconds > existingClub.ellapsedSeconds
-            ) {
+            const firstMember = (existingClub && existingClub.members[0]) === data.userId
+
+            if (firstMember) {
               const club = {
                 ...existingClub,
                 ellapsedSeconds: roundSeconds
@@ -115,8 +114,9 @@ mongoUtil.connect((err) => {
                 }
               }
               state.updateState(newState);
-              clubNs.emit('syncTrack', roundSeconds)
             }
+
+            clubNs.emit('syncTrack', roundSeconds)
           })
           
           socket.on('playNext', async clubId => {

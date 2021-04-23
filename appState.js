@@ -1,6 +1,6 @@
 const AppState = class AppState {
   constructor (initState = {}) {
-    state = initState;
+    this.state = initState;
   }
 
   getState() {

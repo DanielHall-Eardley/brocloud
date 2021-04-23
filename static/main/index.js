@@ -35,7 +35,6 @@ function emitClubInfo () {
 function onClubInfo () {
   clubSocket.on('updateClubState', updateClubState)
   clubSocket.on('updatePlaylist', updatePlaylist);
-  clubSocket.on('stopSync', cancelEmitSeconds)
 }
 
 function updateClubState (club) {

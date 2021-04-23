@@ -157,7 +157,7 @@ exports.getMusic = catchError(async (req, res, next) => {
     playlistPromise
   ]);
   
-  const history;
+  const history = []
     club.listeningHistory.forEach(video => {
       if (video && video._id) {
         timestamp = formatTimestamp(video.mostRecentlyPlayed)

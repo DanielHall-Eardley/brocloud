@@ -193,7 +193,7 @@ mongoUtil.connect((err) => {
               const updatedPlaylist = { 
                 empty: true
               }
-              console.log(updatePlaylist)
+              
               return clubNs.emit('updatePlaylist', updatedPlaylist)
             }
 
@@ -226,7 +226,7 @@ mongoUtil.connect((err) => {
               currentlyPlaying: data[0].currentlyPlaying,
               seconds: state.getState().clubs[club._id].ellapsedSeconds
             }
-            console.log(updatePlaylist)
+        
             clubNs.emit('updatePlaylist', updatedPlaylist)
           })
         })

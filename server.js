@@ -98,12 +98,12 @@ mongoUtil.connect((err) => {
             const prevState = state.getState();
             const existingClub = prevState.clubs[data.clubId];
 
-            if (data.userId === existingClub.members[0]) {
+            if (data.currentPosition > existingClub.ellapsedSeconds) {
               const club = {
                 ...existingClub,
-                ellapsedSeconds: data.seconds
+                ellapsedSeconds: data.currentPosition
               }
-     
+      
               const newState = {
                 ...prevState,
                 clubs: {
@@ -111,9 +111,9 @@ mongoUtil.connect((err) => {
                   [data.clubId]: club
                 }
               }
-    
-              state.updateState(newState);
             }
+  
+            state.updateState(newState);
           })
           
           socket.on('playNext', async clubId => {

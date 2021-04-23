@@ -70,7 +70,7 @@ function updateClubState (club) {
 function emitSeconds () {
   intervalId = setInterval(() => {
     const data = {
-      seconds: player.getCurrentTime(),
+      currentPosition: player.getCurrentTime(),
       clubId: user.clubId,
       userId: user._id
     }

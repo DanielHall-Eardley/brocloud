@@ -60,7 +60,7 @@ function emitSeconds (player, clubId) {
     }
 
     clubSocket.emit('updateSync', data);
-  }, 1000)
+  }, 500)
 }
 
 function cancelEmitSeconds (intervalId) {
@@ -117,6 +117,7 @@ function onYouTubeIframeAPIReady(videoId, ellapsedSeconds, syncActive) {
 }
 
 function onPlayerReady (event, ellapsedSeconds, syncActive) {
+  event.target.setVolume(100);
   event.target.seekTo(ellapsedSeconds, true);
 
   /* 

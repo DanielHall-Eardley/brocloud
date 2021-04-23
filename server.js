@@ -182,7 +182,7 @@ mongoUtil.connect((err) => {
             const newVideoId = playlist.upNext.shift()
 
             if (!newVideoId) {
-              Playlist.updateOne(
+              const updatePlaylistPromise = Playlist.updateOne(
                 { _id: new ObjectId(playlist._id) },
                 {
                   $set: { currentlyPlaying: {} },

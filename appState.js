@@ -7,7 +7,7 @@ const AppState = class AppState {
     return this.state
   }
 
-  updateState = newState => {
+  updateState(newState) {
     this.state = newState
   }
 }

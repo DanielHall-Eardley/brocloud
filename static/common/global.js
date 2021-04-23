@@ -1,5 +1,5 @@
-// export const host = 'http://localhost:3000';
-export const host = 'https://bro-cloud.herokuapp.com';
+export const host = 'http://localhost:3000';
+// export const host = 'https://bro-cloud.herokuapp.com';
 
 export const FormState = class FormState {
   constructor () {
@@ -36,6 +36,10 @@ export const errorState = {
     const errorNotif = document.querySelector('.error');
     const errorMessage = document.createTextNode(error);
     errorNotif.appendChild(errorMessage)
+
+    setTimeout(() => {
+      errorNotif.innerText = ''
+    }, 20000)
   },
   getError() {
     return this.error

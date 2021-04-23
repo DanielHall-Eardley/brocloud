@@ -9,8 +9,6 @@ if (!youtubeApiKey) {
   youtubeApiKey = require('./keys').youtubeApiKey
 }
 
-const state = require('./appState')
-
 const formatTimestamp = (timestamp) => {
   const now = new Date();
   const timeOfPost = new Date(timestamp);
@@ -256,14 +254,10 @@ exports.addVideo = catchError(async (req, res, next) => {
 
   // Check if the new video has been added to queue
   const last = newPlaylist[0].videoList.length - 1;
-  const club = state.getState();
-  const clubState = club.clubs[auth.clubId]
-  
+
   res.status(200).json({ 
     queuedVideo: newPlaylist[0].videoList[last],
     currentlyPlaying: newPlaylist[0].currentlyPlaying,
-    syncActive: clubState.syncActive,
-    ellapsedSeconds: clubState.ellapsedSeconds
   });
 });
 

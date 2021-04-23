@@ -8,6 +8,32 @@ let clubSocket;
 let intervalId;
 const user = JSON.parse(localStorage.getItem('user'));
 
+function onYouTubeIframeAPIReady() {
+  const options = {
+    height: '300',
+    width: '500',
+    playerVars: {
+      cc_load_policy: 0,
+      controls: 0,
+      disablekb: 1,
+      enablejsapi: 1,
+      fs: 0,
+      modestbranding: 1
+    },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange,
+      onError: onPlayerError
+    }
+  }
+
+  const videoId = document.querySelector('#videoId');
+  if (videoId) {
+    options.videoId = videoId.getAttribute('value');
+  }
+  player = new YT.Player('player', options)
+}
+
 window.onload = () => {
   const form = document.querySelector('.main--search');
   formState.init(form);
@@ -16,45 +42,37 @@ window.onload = () => {
   
   mainSocket = io(host)
   mainSocket.on('connect', () => {
-    console.log('Socket connected')
-    mainSocket.emit('setUpNs', user.clubId)
+    console.log('Main socket connected');
+    mainSocket.emit('setUpNs', user.clubId);
   })
 
   clubSocket = io(`/${user.clubId}`)
   clubSocket.on('connect', () => {
-    console.log('Club NS socket connected')
-    emitClubInfo()
-    onClubInfo()
+    console.log('Club socket connected');
+    onYouTubeIframeAPIReady()
   })
 };
 
 function emitClubInfo () {
+  console.log('Initializing club');
   clubSocket.emit('setUpClub', user._id)
 }
 
-function onClubInfo () {
-  clubSocket.on('updateClubState', updateClubState)
-  clubSocket.on('updatePlaylist', updatePlaylist);
-}
-
 function updateClubState (club) {
-  const clubId = user.clubId; 
-  const videoId = document.querySelector('#videoId')
-  
-  if (!videoId) {
-    clubSocket.emit('playNext', clubId);
-    return
-  }
   console.log(club);
-  onYouTubeIframeAPIReady(videoId.value, club.ellapsedSeconds, club.member[0]);
+  const videoId = document.querySelector('#videoId');
+  if (videoId) {
+    player.seekTo(club.ellapsedSeconds, true);
+  }
   updateMembers(club.members); 
 }
 
-function emitSeconds (player, clubId) {
+function emitSeconds () {
   intervalId = setInterval(() => {
     const data = {
       seconds: player.getCurrentTime(),
-      clubId
+      clubId: user.clubId,
+      userId: user._id
     }
 
     clubSocket.emit('updateSync', data);
@@ -87,34 +105,24 @@ function updateMembers (members) {
   });
 }
 
-function onYouTubeIframeAPIReady(videoId, ellapsedSeconds, firstMember) {
-  player = new YT.Player('player', {
-    height: '300',
-    width: '500',
-    videoId: videoId,
-    playerVars: {
-      cc_load_policy: 0,
-      controls: 0,
-      disablekb: 1,
-      enablejsapi: 1,
-      fs: 0,
-      modestbranding: 1,
-    },
-    events: {
-      onReady: event => {
-        onPlayerReady(event, ellapsedSeconds)
-      },
-      onStateChange: event => {
-        onPlayerStateChange(event, firstMember)
-      },
-      onError: onPlayerError
-    }
+function initSocket () {
+  clubSocket.on('updateClubState', updateClubState)
+  clubSocket.on('updatePlaylist', updatePlaylist);
+  clubSocket.on('removeLast', removeLast);
+  clubSocket.on('memberLeft', updateMembers);
+  document.addEventListener("beforeunload", function() {
+    const userId = user._id;
+    const clubId = user.clubId;
+    clubSocket.emit('pageClose', {userId, clubId})
   });
+  console.log('Initialized socket listeners');
 }
 
-function onPlayerReady (event, ellapsedSeconds) {
+function onPlayerReady (event) {
   event.target.setVolume(100)
-  event.target.seekTo(ellapsedSeconds, true);
+  console.log('Initialized youtube player');
+  initSocket()
+  emitClubInfo()
 }
 
 async function formSubmit (event) {
@@ -178,7 +186,6 @@ function addToPlaylist (data) {
   const { 
     currentlyPlaying, 
     queuedVideo,
-    ellapsedSeconds
    } = data;
   
   if (!queuedVideo && currentlyPlaying.videoId) {
@@ -206,7 +213,7 @@ function addToPlaylist (data) {
     li.appendChild(input);
     currentVideo.appendChild(li);
 
-    player.loadVideoById(currentlyPlaying.videoId, ellapsedSeconds);
+    player.loadVideoById(currentlyPlaying.videoId);
   }
   
   if (queuedVideo) {
@@ -225,10 +232,6 @@ function addToPlaylist (data) {
 }
 
 function updatePlaylist (data) {
-  if (data.empty) {
-    return clearInterval(intervalId);
-  }
-
   const { 
     currentlyPlaying, 
     playlist, 
@@ -247,8 +250,8 @@ function updatePlaylist (data) {
   li.appendChild(currentVideoName);
   li.appendChild(div)
   currentVideo.appendChild(li);
-
-  player.loadVideoById(currentVideo.videoId, ellapsedSeconds);
+  
+  player.loadVideoById(currentlyPlaying.videoId, ellapsedSeconds)
 
   const upNext = document.querySelector('.main--up-next');
   upNext.innerText = ""
@@ -267,27 +270,49 @@ function updatePlaylist (data) {
   })
 }
 
-async function onPlayerStateChange(event, firstMember) {
+function removeLast () {
+  let currentVideo = document.querySelector('.main--playing');
+  currentVideo.innerText = '';
+  clearInterval(intervalId)
+}
+
+function onPlayerStateChange(event) {
   const upNext = document.querySelector('.main--up-next');
   const videoCount = upNext.getElementsByTagName('li').length
-  if(event.data === YT.PlayerState.ENDED && videoCount > 0) {
+
+  if(event.data === YT.PlayerState.ENDED && videoCount > 1) {
+    console.log(`Load next video. Status: ${event.data}`);
     clubSocket.emit('playNext', user.clubId);
     clearInterval(intervalId);
   }
 
-  if(event.data === YT.PlayerState.PAUSED && videoCount > 0) {
-    event.target.playVideo()
+  if(
+    event.data === YT.PlayerState.ENDED && 
+    videoCount === 1
+  ) {
+    console.log(`Last video. Status: ${event.data}`);
+    clubSocket.emit('removeLast', user.clubId);
+    clearInterval(intervalId);
   }
 
-  if(event.data === YT.PlayerState.PLAYING && videoCount > 0) {
-    if (user._id === firstMember) {
-      emitSeconds(event.target, user.clubId);
-    }
+  if(event.data === YT.PlayerState.PLAYING) {
+    emitSeconds();
   }
 }
 
 function onPlayerError(event) {
+  const upNext = document.querySelector('.main--up-next');
+  const videoCount = upNext.getElementsByTagName('li').length
   errorState.updateError(`Error loading video. code ${event.data}`)
-  clubSocket.emit('playNext', user.clubId);
-}
+
+  if(videoCount > 1) {
+    clubSocket.emit('playNext', user.clubId);
+    clearInterval(intervalId);
+  }
+
+  if(videoCount === 1) {
+    clubSocket.emit('removeLast', user.clubId);
+    clearInterval(intervalId);
+  }  
+};
 

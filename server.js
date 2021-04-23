@@ -158,7 +158,7 @@ mongoUtil.connect((err) => {
 
             const newClub = {
               ...existingClub,
-              ellapsedSeconds = 0
+              ellapsedSeconds: 0
             }
 
             const newState = {

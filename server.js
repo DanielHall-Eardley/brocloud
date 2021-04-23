@@ -98,7 +98,10 @@ mongoUtil.connect((err) => {
             const prevState = state.getState();
             const existingClub = prevState.clubs[data.clubId];
 
-            if (data.currentPosition > existingClub.ellapsedSeconds) {
+            if (
+              existingClub && 
+              data.currentPosition > existingClub.ellapsedSeconds
+            ) {
               const club = {
                 ...existingClub,
                 ellapsedSeconds: data.currentPosition

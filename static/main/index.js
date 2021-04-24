@@ -6,6 +6,7 @@ let player;
 let mainSocket;
 let clubSocket;
 let intervalId;
+let syncIntervalId
 const user = JSON.parse(localStorage.getItem('user'));
 let trackPosition = 0;
 
@@ -120,7 +121,7 @@ function initSocket () {
 }
 
 function updateTrackPosition (position) {
-  trackPosition = Math.round(position * 10) / 10
+  trackPosition = position
 }
 
 function onPlayerReady (event) {
@@ -273,6 +274,8 @@ function removeLast () {
   let currentVideo = document.querySelector('.main--playing');
   currentVideo.innerText = '';
   clearInterval(intervalId)
+  clearInterval(syncIntervalId);
+  syncIntervalId = null
 }
 
 function onPlayerStateChange(event) {
@@ -283,6 +286,8 @@ function onPlayerStateChange(event) {
     console.log('Load next video. Status: next');
     clubSocket.emit('playNext', user.clubId);
     clearInterval(intervalId);
+    clearInterval(syncIntervalId);
+    syncIntervalId = null
   }
 
   if(
@@ -296,10 +301,13 @@ function onPlayerStateChange(event) {
 
   if(event.data === YT.PlayerState.PLAYING) {
     emitSeconds();
-    const roundCurrentPosition = Math.round(event.target.getCurrentTime() * 10) / 10
-    if (trackPosition > roundCurrentPosition) {
-      event.target.seekTo(trackPosition, true)
-    }
+    // const roundCurrentPosition = Math.round(event.target.getCurrentTime() * 10) / 10
+    syncIntervalId = setInterval(() => {
+      const currentPosition = event.target.getCurrentTime()
+      if (trackPosition > currentPosition) {
+        event.target.seekTo(trackPosition, true)
+      }
+    }, 5000)
   }
 }
 
@@ -311,6 +319,8 @@ function onPlayerError(event) {
   if(videoCount > 1) {
     clubSocket.emit('playNext', user.clubId);
     clearInterval(intervalId);
+    clearInterval(syncIntervalId);
+    syncIntervalId = null
   }
 
   if(videoCount === 1) {

@@ -9,6 +9,7 @@ let intervalId;
 let syncIntervalId;
 const user = JSON.parse(localStorage.getItem('user'));
 let trackPosition = 0;
+let globalClub;
 
 function onYouTubeIframeAPIReady() {
   const options = {
@@ -62,6 +63,7 @@ function emitClubInfo () {
 
 function updateClubState (club) {
   console.log(club);
+  globalClub = club
   const videoId = document.querySelector('#videoId');
   if (videoId) {
     player.seekTo(club.ellapsedSeconds, true);
@@ -111,7 +113,7 @@ function initSocket () {
   clubSocket.on('updateClubState', updateClubState)
   clubSocket.on('updatePlaylist', updatePlaylist);
   clubSocket.on('memberLeft', updateMembers);
-  document.addEventListener("beforeunload", function() {
+  window.addEventListener("beforeunload", function() {
     const userId = user._id;
     const clubId = user.clubId;
     clubSocket.emit('pageClose', {userId, clubId})
@@ -301,12 +303,22 @@ function onPlayerStateChange(event) {
   }
 
   if(event.data === YT.PlayerState.PLAYING) {
-    emitSeconds();
+    const firstMemberId = globalClub.members[0];
+    if (firstMemberId.toString() === user._id.toString()) {
+      emitSeconds();
+    }
+
     syncIntervalId = setInterval(() => {
-      if (trackPosition > event.target.getCurrentTime()) {
+      const currentTime = event.target.getCurrentTime();
+      const ahead = currentTime + 2;
+      const behind = currentTime - 2
+      if (
+        trackPosition >= ahead || 
+        trackPosition <= behind
+      ) {
         event.target.seekTo(trackPosition, true)
       }
-    }, 10000)
+    }, 100000)
   }
 }
 

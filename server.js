@@ -91,32 +91,29 @@ mongoUtil.connect((err) => {
             state.updateState(newState);
             const updatedState = state.getState();
             const updatedClub = updatedState.clubs[user.clubId];
-            clubNs.emit('updateClubState', updatedClub)
+            socket.emit('updateClubState', updatedClub)
           })
     
           socket.on('updateSync', data => {
             const prevState = state.getState();
             const existingClub = prevState.clubs[data.clubId];
             const roundSeconds = Math.round(data.currentPosition * 10) / 10
-            const firstMember = existingClub && existingClub.members[0].toString() === data.userId.toString()
-
-            if (firstMember) {
-              const club = {
-                ...existingClub,
-                ellapsedSeconds: roundSeconds
+    
+            const newClub = {
+              ...existingClub,
+              ellapsedSeconds: roundSeconds
+            }
+    
+            const newState = {
+              ...prevState,
+              clubs: {
+                ...prevState.clubs,
+                [data.clubId]: newClub
               }
-      
-              const newState = {
-                ...prevState,
-                clubs: {
-                  ...prevState.clubs,
-                  [data.clubId]: club
-                }
-              }
-              state.updateState(newState);
             }
 
-            clubNs.emit('syncTrack', roundSeconds)
+            state.updateState(newState);
+            socket.broadcast.emit('syncTrack', roundSeconds);
           })
           
           socket.on('playNext', async clubId => {
@@ -171,7 +168,7 @@ mongoUtil.connect((err) => {
               ellapsedSeconds: state.getState().clubs[club._id].ellapsedSeconds
             }
             
-            clubNs.emit('updatePlaylist', updatedPlaylist)
+            socket.emit('updatePlaylist', updatedPlaylist)
           })
         })
 
@@ -240,7 +237,7 @@ mongoUtil.connect((err) => {
           state.updateState(newState);
           const updatedState = state.getState();
           const updatedMembers = updatedState.clubs[data.clubId].members;
-          clubNs.emit('memberLeft', updatedMembers)
+          socket.emit('memberLeft', updatedMembers)
         })
       })
     })

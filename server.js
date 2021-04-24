@@ -98,7 +98,7 @@ mongoUtil.connect((err) => {
             const prevState = state.getState();
             const existingClub = prevState.clubs[data.clubId];
             const roundSeconds = Math.round(data.currentPosition * 10) / 10
-            const firstMember = existingClub && existingClub.members[0] === data.userId
+            const firstMember = existingClub && existingClub.members[0].toString() === data.userId.toString()
 
             if (firstMember) {
               const club = {
@@ -215,15 +215,13 @@ mongoUtil.connect((err) => {
             updatePlaylistPromise,
             updateClubPromise
           ])
-          
-          clubNs.emit('removeLast')
         })
 
         socket.on('pageClose', data => {
           const prevState = state.getState();
           const existingClub = prevState.clubs[data.clubId];
           const filterMembers = existingClub.members.filter(
-            memberId => memberId !== data.userId
+            memberId => memberId.toString() !== data.userId.toString()
           )
 
           const newClub = {

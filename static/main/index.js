@@ -77,7 +77,7 @@ function emitSeconds () {
     }
 
     clubSocket.emit('updateSync', data);
-  }, 500)
+  }, 200)
 }
 
 function addHistoryListeners () {
@@ -109,7 +109,6 @@ function updateMembers (members) {
 function initSocket () {
   clubSocket.on('updateClubState', updateClubState)
   clubSocket.on('updatePlaylist', updatePlaylist);
-  clubSocket.on('removeLast', removeLast);
   clubSocket.on('memberLeft', updateMembers);
   document.addEventListener("beforeunload", function() {
     const userId = user._id;
@@ -292,7 +291,7 @@ function onPlayerStateChange(event) {
   ) {
     console.log('Last video. Status: finished');
     clubSocket.emit('removeLast', user.clubId);
-    clearInterval(intervalId);
+    removeLast()
   }
 
   if(event.data === YT.PlayerState.PLAYING) {
@@ -316,7 +315,7 @@ function onPlayerError(event) {
 
   if(videoCount === 1) {
     clubSocket.emit('removeLast', user.clubId);
-    clearInterval(intervalId);
+    removeLast()
   }  
 };
 

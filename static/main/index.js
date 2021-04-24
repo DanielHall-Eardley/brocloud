@@ -309,11 +309,9 @@ function onPlayerStateChange(event) {
     } else {
       syncIntervalId = setInterval(() => {
         const currentTime = event.target.getCurrentTime();
-        const ahead = currentTime + 1;
-        const behind = currentTime - 1
         if (
-          trackPosition >= ahead || 
-          trackPosition <= behind 
+          trackPosition > currentTime || 
+          trackPosition < currentTime
         ) {
           event.target.seekTo(trackPosition, true)
         }

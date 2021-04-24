@@ -58,6 +58,16 @@ const addDocument = async (db, newDoc) => {
   return response.ops[0];
 };
 
+const updateDocument = async (db, filter, update, options = {}) => {
+  options.returnOriginal = false
+  const newDoc = await db.findOneAndUpdate(filter, update, options);
+  console.log(newDoc)
+  if (newDoc.ok !== 1) {
+    throwError('Unable to queue your video', 500);
+  }
+  return newDoc.value
+}
+
 const extractIds = req => {
   const [userId, clubId] = req.get('Authorization').split(' ')
   return {
@@ -235,6 +245,7 @@ exports.addVideo = catchError(async (req, res, next) => {
   */
   const filter = { _id: new ObjectID(playlist._id) };
   const update = {};
+
   if (playlist.currentlyPlaying && playlist.currentlyPlaying.name) {
     update.$push = { upNext: new ObjectID(video._id) }
   } else {
@@ -243,21 +254,17 @@ exports.addVideo = catchError(async (req, res, next) => {
     }; 
   }
 
-  const updatedPlaylist = await Playlist.updateOne(filter, update);
-
-  if (updatedPlaylist.result.ok !== 1) {
-    throwError('Unable to add your song to the playlist')
-  }
-
-  // Aggregate the playlist to lookup videos from videoIds
-  const newPlaylist = await playlistRequest(Playlist, auth.clubId)
+  const updatedPlaylist = await updateDocument(Playlist, filter, update)
 
   // Check if the new video has been added to queue
-  const last = newPlaylist[0].videoList.length - 1;
-
+  let addedVideo = updatedPlaylist.upNext.pop();
+  if (addedVideo.toString() === video._id.toString()) {
+    addedVideo = video
+  }
+  console.log(addedVideo)
   res.status(200).json({ 
-    queuedVideo: newPlaylist[0].videoList[last],
-    currentlyPlaying: newPlaylist[0].currentlyPlaying,
+    queuedVideo: addedVideo,
+    currentlyPlaying: updatedPlaylist.currentlyPlaying,
   });
 });
 

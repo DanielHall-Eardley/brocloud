@@ -98,7 +98,7 @@ mongoUtil.connect((err) => {
             const prevState = state.getState();
             const existingClub = prevState.clubs[data.clubId];
             const roundSeconds = Math.round(data.currentPosition * 10) / 10
-            const firstMember = (existingClub && existingClub.members[0]) === data.userId
+            const firstMember = existingClub && existingClub.members[0] === data.userId
 
             if (firstMember) {
               const club = {

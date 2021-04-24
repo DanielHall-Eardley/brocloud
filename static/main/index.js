@@ -306,19 +306,19 @@ function onPlayerStateChange(event) {
     const firstMemberId = globalClub.members[0];
     if (firstMemberId.toString() === user._id.toString()) {
       emitSeconds();
+    } else {
+      syncIntervalId = setInterval(() => {
+        const currentTime = event.target.getCurrentTime();
+        const ahead = currentTime + 1;
+        const behind = currentTime - 1
+        if (
+          trackPosition >= ahead || 
+          trackPosition <= behind 
+        ) {
+          event.target.seekTo(trackPosition, true)
+        }
+      }, 60000)
     }
-
-    syncIntervalId = setInterval(() => {
-      const currentTime = event.target.getCurrentTime();
-      const ahead = currentTime + 2;
-      const behind = currentTime - 2
-      if (
-        trackPosition >= ahead || 
-        trackPosition <= behind
-      ) {
-        event.target.seekTo(trackPosition, true)
-      }
-    }, 100000)
   }
 }
 

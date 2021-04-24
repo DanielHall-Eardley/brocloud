@@ -301,10 +301,8 @@ function onPlayerStateChange(event) {
 
   if(event.data === YT.PlayerState.PLAYING) {
     emitSeconds();
-    // const roundCurrentPosition = Math.round(event.target.getCurrentTime() * 10) / 10
     syncIntervalId = setInterval(() => {
-      const currentPosition = event.target.getCurrentTime()
-      if (trackPosition > currentPosition) {
+      if (trackPosition > event.target.getCurrentTime()) {
         event.target.seekTo(trackPosition, true)
       }
     }, 5000)

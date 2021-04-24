@@ -97,13 +97,13 @@ mongoUtil.connect((err) => {
           socket.on('updateSync', data => {
             const prevState = state.getState();
             const existingClub = prevState.clubs[data.clubId];
-            // const roundSeconds = Math.round(data.currentPosition * 10) / 10
+            const roundSeconds = Math.round(data.currentPosition * 10) / 10
             const firstMember = existingClub && existingClub.members[0].toString() === data.userId.toString()
 
             if (firstMember) {
               const club = {
                 ...existingClub,
-                ellapsedSeconds: data.currentPosition
+                ellapsedSeconds: roundSeconds
               }
       
               const newState = {
@@ -116,7 +116,7 @@ mongoUtil.connect((err) => {
               state.updateState(newState);
             }
 
-            clubNs.emit('syncTrack', data.currentPosition)
+            clubNs.emit('syncTrack', roundSeconds)
           })
           
           socket.on('playNext', async clubId => {

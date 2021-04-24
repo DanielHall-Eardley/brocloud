@@ -6,7 +6,7 @@ let player;
 let mainSocket;
 let clubSocket;
 let intervalId;
-let syncIntervalId
+let syncIntervalId;
 const user = JSON.parse(localStorage.getItem('user'));
 let trackPosition = 0;
 
@@ -78,7 +78,7 @@ function emitSeconds () {
     }
 
     clubSocket.emit('updateSync', data);
-  }, 200)
+  }, 500)
 }
 
 function addHistoryListeners () {
@@ -273,9 +273,12 @@ function updatePlaylist (data) {
 function removeLast () {
   let currentVideo = document.querySelector('.main--playing');
   currentVideo.innerText = '';
+  stopSync()
+}
+
+function stopSync () {
   clearInterval(intervalId)
   clearInterval(syncIntervalId);
-  syncIntervalId = null
 }
 
 function onPlayerStateChange(event) {
@@ -285,9 +288,7 @@ function onPlayerStateChange(event) {
   if(event.data === YT.PlayerState.ENDED && videoCount > 0) {
     console.log('Load next video. Status: next');
     clubSocket.emit('playNext', user.clubId);
-    clearInterval(intervalId);
-    clearInterval(syncIntervalId);
-    syncIntervalId = null
+    stopSync()
   }
 
   if(
@@ -316,9 +317,7 @@ function onPlayerError(event) {
 
   if(videoCount > 1) {
     clubSocket.emit('playNext', user.clubId);
-    clearInterval(intervalId);
-    clearInterval(syncIntervalId);
-    syncIntervalId = null
+    stopSync()
   }
 
   if(videoCount === 1) {

@@ -113,7 +113,8 @@ function initSocket () {
   clubSocket.on('updateClubState', updateClubState)
   clubSocket.on('updatePlaylist', updatePlaylist);
   clubSocket.on('memberLeft', updateMembers);
-  window.addEventListener("beforeunload", function() {
+  window.addEventListener("unload", function() {
+    console.log('closing page')
     const userId = user._id;
     const clubId = user.clubId;
     clubSocket.emit('pageClose', {userId, clubId})

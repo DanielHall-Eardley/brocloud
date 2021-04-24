@@ -220,7 +220,7 @@ mongoUtil.connect((err) => {
           const filterMembers = existingClub.members.filter(
             memberId => memberId.toString() !== data.userId.toString()
           )
-
+          console.log(filterMembers)
           const newClub = {
             ...existingClub,
             members: filterMembers

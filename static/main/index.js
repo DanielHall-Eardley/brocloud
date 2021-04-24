@@ -280,17 +280,17 @@ function onPlayerStateChange(event) {
   const upNext = document.querySelector('.main--up-next');
   const videoCount = upNext.getElementsByTagName('li').length
 
-  if(event.data === YT.PlayerState.ENDED && videoCount > 1) {
-    console.log(`Load next video. Status: ${event.data}`);
+  if(event.data === YT.PlayerState.ENDED && videoCount > 0) {
+    console.log('Load next video. Status: next');
     clubSocket.emit('playNext', user.clubId);
     clearInterval(intervalId);
   }
 
   if(
     event.data === YT.PlayerState.ENDED && 
-    videoCount === 1
+    videoCount === 0
   ) {
-    console.log(`Last video. Status: ${event.data}`);
+    console.log('Last video. Status: finished');
     clubSocket.emit('removeLast', user.clubId);
     clearInterval(intervalId);
   }

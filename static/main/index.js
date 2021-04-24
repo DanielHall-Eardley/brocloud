@@ -305,7 +305,7 @@ function onPlayerStateChange(event) {
       if (trackPosition > event.target.getCurrentTime()) {
         event.target.seekTo(trackPosition, true)
       }
-    }, 5000)
+    }, 10000)
   }
 }
 

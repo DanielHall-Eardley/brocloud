@@ -127,6 +127,10 @@ exports.signup = catchError(async (req, res, next) => {
     }
 
     club = await addDocument(Club, { name: clubName, listeningHistory: []});
+  }
+
+  const checkPlaylistExists = await Playlist.findOne({ clubId: club._id })
+  if (!checkPlaylistExists) {
     await addDocument(
       Playlist, 
       {
@@ -136,6 +140,7 @@ exports.signup = catchError(async (req, res, next) => {
       }
     );
   }
+  
 
   const userDoc = {
     firstName,

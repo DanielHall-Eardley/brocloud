@@ -252,10 +252,15 @@ exports.addVideo = catchError(async (req, res, next) => {
   const update = {};
 
   let addTo;
-  if (playlist.currentlyPlaying && playlist.currentlyPlaying.name) {
+  if (
+    playlist.currentlyPlaying && 
+    playlist.currentlyPlaying.name
+    ) {
     update.$push = { upNext: new ObjectID(video._id) }
     addTo = 'queue'
-  } else {
+  } 
+  
+  if (playlist.upNext.length > 0) {
     addTo = 'current'
     update.$set = {
       currentlyPlaying: video

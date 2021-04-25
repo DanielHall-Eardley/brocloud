@@ -99,11 +99,10 @@ mongoUtil.connect((err) => {
           socket.on('updateSync', data => {
             const prevState = state.getState();
             const existingClub = prevState.clubs[data.clubId];
-            const roundSeconds = Math.round(data.currentPosition * 10) / 10
-    
+            
             const newClub = {
               ...existingClub,
-              ellapsedSeconds: roundSeconds
+              ellapsedSeconds: data.currentPosition
             }
     
             const newState = {
@@ -115,7 +114,7 @@ mongoUtil.connect((err) => {
             }
 
             state.updateState(newState);
-            socket.broadcast.emit('syncTrack', roundSeconds);
+            socket.broadcast.emit('syncTrack', data.currentPosition);
           })
           
           socket.on('playNext', async clubId => {

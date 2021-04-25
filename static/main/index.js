@@ -6,7 +6,7 @@ let player;
 let mainSocket;
 let clubSocket;
 let intervalId;
-let syncIntervalId;
+let sync = false;
 const user = JSON.parse(localStorage.getItem('user'));
 let trackPosition = 0;
 let globalClub;
@@ -193,19 +193,19 @@ function createResultList (data) {
 
 function addToPlaylist (data) {
   const { 
-    currentlyPlaying, 
-    queuedVideo,
-   } = data;
+    addTo, 
+    addedVideo,
+  } = data;
   
-  if (!queuedVideo && currentlyPlaying) {
+  if (addTo === 'current') {
     let currentVideo = document.querySelector('.main--playing');
-    const currentVideoName = document.createTextNode(currentlyPlaying.name); 
-    const currentUserName = document.createTextNode(currentlyPlaying.userFullName); 
+    const currentVideoName = document.createTextNode(addedVideo.name); 
+    const currentUserName = document.createTextNode(addedVideo.userFullName); 
     
     const li = document.createElement('li');
     const div = document.createElement('div');
     const input = document.createElement('input');
-    input.setAttribute('value', currentlyPlaying.videoId);
+    input.setAttribute('value', addedVideo.videoId);
     input.setAttribute('id', 'videoId');
     input.setAttribute('type', 'hidden');
     
@@ -216,13 +216,13 @@ function addToPlaylist (data) {
     li.appendChild(input);
     currentVideo.appendChild(li);
 
-    player.loadVideoById(currentlyPlaying.videoId);
+    player.loadVideoById(addedVideo.videoId);
   }
   
-  if (queuedVideo) {
+  if (addTo === 'queue') {
     const upNext = document.querySelector('.main--up-next');
-    const videoName = document.createTextNode(queuedVideo.name); 
-    const userName = document.createTextNode(queuedVideo.userFullName); 
+    const videoName = document.createTextNode(addedVideo.name); 
+    const userName = document.createTextNode(addedVideo.userFullName); 
      
     const li = document.createElement('li');
     const div = document.createElement('div');
@@ -281,7 +281,7 @@ function removeLast () {
 
 function stopSync () {
   clearInterval(intervalId)
-  clearInterval(syncIntervalId);
+  sync = false;
 }
 
 function onPlayerStateChange(event) {
@@ -307,13 +307,14 @@ function onPlayerStateChange(event) {
     const firstMemberId = globalClub.members[0];
     if (firstMemberId.toString() === user._id.toString()) {
       emitSeconds();
-    } else {
+    } else if (!sync) {
         const currentTime = event.target.getCurrentTime();
         if (
           trackPosition > currentTime || 
           trackPosition < currentTime
         ) {
           event.target.seekTo(trackPosition, true)
+          sync = true
         }
     }
   }

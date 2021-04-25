@@ -62,7 +62,6 @@ const addDocument = async (db, newDoc) => {
 const updateDocument = async (db, filter, update, options = {}) => {
   options.returnOriginal = false
   const newDoc = await db.findOneAndUpdate(filter, update, options);
-  console.log(newDoc)
   if (newDoc.ok !== 1) {
     throwError('Unable to queue your video', 500);
   }
@@ -247,25 +246,22 @@ exports.addVideo = catchError(async (req, res, next) => {
   const filter = { _id: new ObjectID(playlist._id) };
   const update = {};
 
+  let addTo;
   if (playlist.currentlyPlaying && playlist.currentlyPlaying.name) {
     update.$push = { upNext: new ObjectID(video._id) }
+    addTo = 'queue'
   } else {
+    addTo = 'current'
     update.$set = {
       currentlyPlaying: video
     }; 
   }
 
-  const updatedPlaylist = await updateDocument(Playlist, filter, update)
-
-  // Check if the new video has been added to queue
-  let addedVideo = updatedPlaylist.upNext.pop();
-  if (addedVideo.toString() === video._id.toString()) {
-    addedVideo = video
-  }
+  await updateDocument(Playlist, filter, update) 
 
   const data = {
-    queuedVideo: addedVideo,
-    currentlyPlaying: updatedPlaylist.currentlyPlaying,
+    addedVideo: video,
+    addTo
   }
 
   const clubSocket = io.of(`/${auth.clubId}`);

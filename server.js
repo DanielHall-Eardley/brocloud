@@ -13,6 +13,10 @@ mongoUtil.connect((err) => {
       console.log('connected at ' + port)
     });
 
+    const ioOptions = {}
+    const io = require('socket.io')(server, ioOptions)
+    exports.io = io;
+
     app.set('view-engine', 'ejs');
     app.use(express.json());
     app.use(express.urlencoded({extended: true}));
@@ -38,8 +42,6 @@ mongoUtil.connect((err) => {
     /****** Socket ******/
 
     const state = require('./appState');
-    const options = {}
-    const io = require('socket.io')(server, options)
     const db = mongoUtil.getDb();
     const { ObjectID, ObjectId } = require('mongodb');
     const User = db.collection('user');
@@ -48,7 +50,6 @@ mongoUtil.connect((err) => {
     const Playlist = db.collection('playlist');
     const { playlistRequest } = require('./controller').dbUtil
 
-    exports.io = io;
     io.on('connection', (socket) => {
       socket.on('setUpNs', clubId => {
         clubNs = io.of(`/${clubId}`);

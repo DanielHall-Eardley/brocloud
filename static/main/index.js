@@ -113,6 +113,7 @@ function initSocket () {
   clubSocket.on('updateClubState', updateClubState)
   clubSocket.on('updatePlaylist', updatePlaylist);
   clubSocket.on('memberLeft', updateMembers);
+  clubSocket.on('addToPlaylist', addToPlaylist);
   window.addEventListener("unload", function() {
     console.log('closing page')
     const userId = user._id;
@@ -157,8 +158,7 @@ function addVideoListener (btn, ul, name, videoId) {
       videoId
     }
 
-    const data = await api.addVideo(body)
-    addToPlaylist(data);
+    await api.addVideo(body)
   })
 }
 
@@ -308,7 +308,6 @@ function onPlayerStateChange(event) {
     if (firstMemberId.toString() === user._id.toString()) {
       emitSeconds();
     } else {
-      syncIntervalId = setInterval(() => {
         const currentTime = event.target.getCurrentTime();
         if (
           trackPosition > currentTime || 
@@ -316,7 +315,6 @@ function onPlayerStateChange(event) {
         ) {
           event.target.seekTo(trackPosition, true)
         }
-      }, 60000)
     }
   }
 }

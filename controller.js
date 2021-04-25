@@ -3,6 +3,7 @@ const catchError = require('./util/catchError');
 const throwError = require('./util/throwError');
 const { format, differenceInDays } = require('date-fns');
 const fetch = require('node-fetch');
+const { io } = require('./server')
 
 let youtubeApiKey = process.env.YOUTUBE_API_KEY  
 if (!youtubeApiKey) {
@@ -261,10 +262,14 @@ exports.addVideo = catchError(async (req, res, next) => {
   if (addedVideo.toString() === video._id.toString()) {
     addedVideo = video
   }
-  console.log(addedVideo)
-  res.status(200).json({ 
+
+  const data = {
     queuedVideo: addedVideo,
     currentlyPlaying: updatedPlaylist.currentlyPlaying,
-  });
+  }
+
+  const clubSocket = io.of(`/${auth.clubId}`);
+  clubSocket.emit('addToPlaylist', data)
+  res.status(200).json({ message: "Video added" });
 });
 

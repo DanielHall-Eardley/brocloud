@@ -48,6 +48,7 @@ mongoUtil.connect((err) => {
     const Playlist = db.collection('playlist');
     const { playlistRequest } = require('./controller').dbUtil
 
+    exports.io = io;
     io.on('connection', (socket) => {
       socket.on('setUpNs', clubId => {
         clubNs = io.of(`/${clubId}`);

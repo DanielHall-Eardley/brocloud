@@ -52,14 +52,14 @@ exports.queueNext = async (data, clubSocket) => {
   }
   
   const updatedClub = await updateDocument(Club, filter, update);
-  const currentVideo = updatedClub.upNext.shift();
+  const newVideo = updatedClub.upNext.shift();
 
   /*
-  Send the next video to be played (currentVideo)
+  Send the next video to be played (newVideo)
   and the id of previous video for removal from the DOM  
   */
   const dataObj = {
-    currentVideo,
+    newVideo,
     previousVideoId: playedVideo._id
   }
 

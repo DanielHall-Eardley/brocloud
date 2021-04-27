@@ -1,9 +1,10 @@
 import { player } from './youTube'
 
 function queueNext (data) {
-  const { nextVideo, previousVideoId } = data
-  if (nextVideo) {
-    player.loadVideoById(nextVideo.videoId)
+  console.log(data)
+  const { newVideo, previousVideoId } = data
+  if (newVideo) {
+    player.loadVideoById(newVideo.videoId)
   }
 
   const upNext = document.querySelector('.main--up-next');
@@ -11,9 +12,9 @@ function queueNext (data) {
   const children = upNext.getElementsByTagName('li');
 
   for (let li of children) {
-    if (children.id.toString() == previousVideoId.toString()) {
-      history.prependChild(li);
+    if (li.getAttribute('id').toString() == previousVideoId.toString()) {
       upNext.removeChild(li);
+      history.prepend(li);
     }
   }  
 }

@@ -1,7 +1,12 @@
+import { player } from './youTube';
+
 function addToPlaylist (data) {
   const video = data.video
   const upNext = document.querySelector('.main--up-next');
   const videoCount = upNext.getElementsByTagName('li').length
+  if (videoCount === 0) {
+    player.loadVideoById(video.videoId);
+  }
 
   const videoName = document.createTextNode(video.name); 
   const userName = document.createTextNode(video.userFullName);   

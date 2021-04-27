@@ -2,6 +2,7 @@ import initSocketListeners from './initSocketListeners';
 import { updateError } from '../common/global.js';
 import { startSync, stopSync } from './sync'
 import getUser from './getUser';
+import { clubSocket } from './socket';
 const user = getUser();
 
 let player;
@@ -12,7 +13,7 @@ function onYouTubeIframeAPIReady() {
     width: '500',
     playerVars: {
       cc_load_policy: 0,
-      controls: 0,
+      // controls: 0,
       disablekb: 1,
       enablejsapi: 1,
       fs: 0,

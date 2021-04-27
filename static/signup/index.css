@@ -6,7 +6,6 @@
 .signup--form {
   width: clamp(30rem, 50rem, 70rem);
   padding: 2rem;
-  border: solid var(--dark-green) 1px;
   border-radius: 10px;
 }
 
@@ -15,4 +14,30 @@
  width: 100%;
  margin-bottom: 1rem;
  font-size: 1.6rem;
+}
+
+.signup--btn-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.signup--club {
+  background-color: var(--beige);
+  border-radius: 10px;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min-content, 1fr));
+  margin-bottom: 1rem;
+}
+
+.btn--club {
+  background-color: var(--white);
+  border: solid 1px var(--light-green);
+  padding: .5rem 1rem;
+  outline: none
+}
+
+.btn--club:focus {
+  background-color: var(--dark-green);
+  color: var(--white);
 }

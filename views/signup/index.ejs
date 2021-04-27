@@ -9,33 +9,42 @@
   <title>BroCloud</title>
 </head>
 <body>
-  <h1 class="signup--title"><%= action %></h1>
+  <h1 class="signup--title">Join your squad.</h1>
+  <p class="error"></p>
   <main class="u--center-content">
-    <form 
-      action="/<%= action %>" 
+    <form  
       method="POST"
       class="signup--form"
     >
       <label for="firstName">Enter your first name</label>
       <input type="text" id="firstName" name="firstName">
+
       <label for="lastName">Enter your last name</label>
       <input type="text" id="lastName" name="lastName">
+
       <label for="nickName">Enter your nick name</label>
       <input type="text" id="nickName" name="nickName">
-      <% if (action === 'signup') { %>
-        <label for="club">Select a club to join</label>
-        <select name="clubId" id="club" class="signup--club">
-          <option selected value=null>None</option>
-          <% clubs.forEach((club) => { %>
-            <option value="<%= club._id %>">
-              <%= club.name %>
-            </option>
-          <% }); %>   
-        </select>
-        <label for="clubName">Or create a new club</label>
-        <input type="text" id="clubName" name="clubName">
-      <% } %>
-      <button class="btn--primary"><%= action %></button>
+
+      <label for="club">Select a club to join</label>
+      <div  id="club" class="signup--club">
+        <% clubs.forEach((club) => { %>
+          <button 
+            value="<%= club._id %>" 
+            class="btn--club"
+            name="clubId"
+          >
+            <%= club.name %>
+          </button>
+        <% }); %>   
+        </div>
+      <h3>OR</h3>
+      <label for="clubName">Enter name of club to be created</label>
+      <input type="text" id="clubName" name="clubName">
+      <div class="signup--btn-container">
+        <button id="signup--btn" class="btn--primary" name="join">
+          Join club
+        </button>
+      </div>
     </form>
   </main>
 </body>

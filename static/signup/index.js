@@ -1,18 +1,31 @@
 import { FormState, host } from '../common/global.js';
 import api from '../common/api';
-const formState = new FormState()
+import signupType from './signupType';
+const formState = new FormState(signupType);
 
 window.onload = () => {
   const form = document.querySelector('.signup--form');
-  formState.init(form);
+  const extraListeners = {
+    identifier: '.signup--club',
+    childElementType: 'button',
+    eventType: 'click'
+  }
+  formState.init(form, extraListeners);
   form.addEventListener('submit', formSubmit);
 };
 
 async function formSubmit (event) {
   event.preventDefault();
+  const signupType = event.submitter.name;
   const body = formState.formData();
-  const data = await api.signup(body);
-  console.log(data)
+
+  const dataObj = {
+    body,
+    url: signupType
+  }
+
+  const data = await api.signup(dataObj);
+  
   localStorage.setItem('user', JSON.stringify(data.user));
-  window.location.replace(`${host}/music/${data.user.clubId}`);
+  window.location.replace(`${host}/music/${data.user.clubId}/${data.user._id}`);
 }

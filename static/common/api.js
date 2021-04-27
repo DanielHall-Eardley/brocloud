@@ -1,4 +1,4 @@
-import { host, errorState } from './global.js';
+import { host, updateError } from './global.js';
 const user = JSON.parse(localStorage.getItem('user'))
 
 const options = {
@@ -28,12 +28,12 @@ const request = async (url, body, method) => {
     return Promise.resolve(data)
   }
 
-  errorState.updateError(res.error)
+  updateError(res.error)
 }
 
 export default {
-  signup: async body => {
-    const data = await request('/signup', body);
+  signup: async obj => {
+    const data = await request(`/signup/${obj.url}`, obj.body);
     return Promise.resolve(data)
   },
   search: async body => {

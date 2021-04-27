@@ -1,9 +1,21 @@
-const mongoUtil = require('./mongoUtil');
 const catchError = require('./util/catchError');
 const throwError = require('./util/throwError');
 const { format, differenceInDays } = require('date-fns');
 const fetch = require('node-fetch');
-const { io } = require('./server')
+const sanitizeHtml = require('sanitize-html');
+const Session = require('./sessionState');
+const { initClubSocket, clubNs } = require('./socketUtil');
+
+const { 
+  updateDocument,
+  addDocument,
+  findDocuments,
+  dbConnection,
+} = require('./setupUtil');
+const { ObjectID } = require('mongodb');
+
+const User = dbConnection().collection('user');
+const Club = dbConnection().collection('club');
 
 let youtubeApiKey = process.env.YOUTUBE_API_KEY  
 if (!youtubeApiKey) {
@@ -30,44 +42,6 @@ const formatTimestamp = (timestamp) => {
   return format(timeOfPost, 'MMM do h:m aaa');
 }
 
-const db = mongoUtil.getDb();
-// addCollections(db);
-const { ObjectID } = require('mongodb');
-
-const User = db.collection('user');
-const Club = db.collection('club');
-const Video = db.collection('video');
-const Playlist = db.collection('playlist');
-
-const findDocuments = (
-  db, query = {}, options = {} 
-) => {
-  return new Promise(async (resolve, reject) => {
-    const cursor = await db.find(query, options)
-    const data = await cursor.toArray()
-    if (!data) {
-      reject(throwError('Documents not found', 404));
-    }
-
-    await cursor.close()
-    resolve(data)
-  })
-}
-
-const addDocument = async (db, newDoc) => {
-  const response = await db.insertOne(newDoc);
-  return response.ops[0];
-};
-
-const updateDocument = async (db, filter, update, options = {}) => {
-  options.returnOriginal = false
-  const newDoc = await db.findOneAndUpdate(filter, update, options);
-  if (newDoc.ok !== 1) {
-    throwError('Unable to queue your video', 500);
-  }
-  return newDoc.value
-}
-
 const extractIds = req => {
   const [userId, clubId] = req.get('Authorization').split(' ')
   return {
@@ -76,71 +50,28 @@ const extractIds = req => {
   }
 }
 
-const playlistRequest = (db, clubId) => {
-  return db.aggregate([
-    { $match: { clubId: new ObjectID(clubId) } },
-    { 
-      $lookup: {
-        from: 'video',
-        localField: 'upNext',
-        foreignField: '_id',
-        as: 'videoList'
-      }
-    }
-  ]).toArray();
-}
-
-exports.dbUtil = {
-  playlistRequest
-}
-
 exports.getSignup = catchError(async (req, res, next) => {
   const clubs = await findDocuments(Club);
   const data = {
     clubs,
-    action: 'signup'
   };
 
   res.render('./signup/index.ejs', data);
 });
 
-exports.signup = catchError(async (req, res, next) => {
+exports.joinClub = catchError(async (req, res, next) => {
   const {
     firstName,
     lastName,
     nickName,
-    clubName,
     clubId
   } = req.body;
 
-  let club = {};
-  if (clubId && clubId !== 'null') {
-    club._id = clubId;
-  } else {
-    if (!clubName) {
-      return throwError('New club must have a name', 403);
-    }
-
-    const checkClubExists = await Club.findOne({ name: clubName })
-    if (checkClubExists) {
-      return throwError(`Club already exists with the name ${clubName}`, 403);
-    }
-
-    club = await addDocument(Club, { name: clubName, listeningHistory: []});
-  }
-
-  const checkPlaylistExists = await Playlist.findOne({ clubId: club._id })
-  if (!checkPlaylistExists) {
-    await addDocument(
-      Playlist, 
-      {
-        clubId: new ObjectID(club._id),
-        currentlyPlaying: {},
-        upNext: []
-      }
-    );
-  }
+  const checkClubExists = await Club.findOne({ _id: new ObjectID(clubId) })
   
+  if (!checkClubExists) {
+    return throwError('Club not found', 404);
+  }
 
   const userDoc = {
     firstName,
@@ -148,55 +79,76 @@ exports.signup = catchError(async (req, res, next) => {
     nickName,
     clubId: new ObjectID(club._id)
   };
-
   const savedUser = await addDocument(User, userDoc);
+
   res.status(200).json({ user: savedUser });
 })
 
+exports.createClub = catchError(async (req, res, next) => {
+  const {
+    firstName,
+    lastName,
+    nickName,
+    clubName
+  } = req.body;
+
+  if (!clubName) {
+    return throwError('New club must have a name', 403);
+  }
+
+  const clubDoc = {
+    name: clubName,
+    history: [],
+    upNext: []
+  }
+  const club = await addDocument(Club, clubDoc);
+
+  const userDoc = {
+    firstName,
+    lastName,
+    nickName,
+    clubId: new ObjectID(club._id)
+  };
+  const savedUser = await addDocument(User, userDoc);
+
+  res.status(200).json({ user: savedUser });
+});
+
 exports.getMusic = catchError(async (req, res, next) => {
-  const { clubId } = req.params;
+  const { clubId, userId } = req.params;
 
   const userPromise = findDocuments(User, { clubId: new ObjectID(clubId) });
   const clubPromise = Club.findOne({ _id: new ObjectID(clubId) });
-  const playlistPromise = playlistRequest(Playlist, clubId)
 
   const [
     members, 
     club, 
-    playlist
   ] = await Promise.all([
     userPromise,
     clubPromise,
-    playlistPromise
   ]);
   
-  const history = []
-    club.listeningHistory.forEach(video => {
-      if (video && video._id) {
-        timestamp = formatTimestamp(video.mostRecentlyPlayed)
-        history.push({
-          videoId: video.videoId,
-          name: video.name,
-          userFullName: video.userFullName,
-          timestamp
-        })
+  const formattedHistory = club.history.map(video => {
+      const timestamp = formatTimestamp(video.playedAtTime)
+      return {
+        ...video,
+        playedAtTime: timestamp
       }
   });
   
-
   const data = {
     members,
     club,
-    playlist: playlist[0].videoList,
-    history,
-    currentlyPlaying: playlist[0].currentlyPlaying
+    history: formattedHistory,
+    upNext: club.upNext
   };
 
+  initClubSocket(club._id);
   res.render('./main/index.ejs', data);
 });
 
 exports.search = catchError(async (req, res, next) => {
-  const url = `https://www.googleapis.com/youtube/v3/search?type=video&part=snippet&maxResults=3&q=${req.body.searchQuery}&key=${youtubeApiKey}&fields=items(id,snippet/title,snippet/thumbnails/default)&videoCategoryId=10`
+  const url = `https://www.googleapis.com/youtube/v3/search?type=video&part=snippet&maxResults=8&q=${req.body.searchQuery}&key=${youtubeApiKey}&fields=items(id,snippet/title,snippet/thumbnails/default)&videoCategoryId=10`
   const response = await fetch(url);
   const results = await response.json();
   res.status(200).json({ results });
@@ -210,72 +162,35 @@ exports.addVideo = catchError(async (req, res, next) => {
     videoId
   } = req.body;
 
-  const userPromise = User.findOne({ _id: new ObjectID(auth.userId) });
-  const existingVideoPromise = Video.findOne({ videoId });
-  const playlistPromise = Playlist.findOne({ clubId: new ObjectID(auth.clubId) })
-  
-  const [
-    user, 
-    existingVideo,
-    playlist
-  ] = await Promise.all([
-    userPromise, 
-    existingVideoPromise,
-    playlistPromise
-  ]);
-
-  if (!user) {
-    throwError('You must be signed up to add songs');
+  if (!name || !videoId) {
+    throwError('There was a problem adding your video', 422)
   }
 
-  //create video if none exists
-  let video;
-  if(existingVideo) {
-    video = existingVideo
-  } else {
-    const userFullName = `${user.firstName} \"${user.nickName}\" ${user.lastName}`;
-    const videoDoc = {
-      name,
-      videoId,
-      userFullName,
-      firstPlayed: new Date(),
-      mostRecentlyPlayed: new Date(),
-    };
+  const user = await User.findOne({ _id: new ObjectID(auth.userId) });
+  const userFullName = `${user.firstName} \"${user.nickName}\" ${user.lastName}`;
+  const sanitizeName = sanitizeHtml(name);
 
-    video = await addDocument(Video, videoDoc);
-  }
-  /* 
-  Update the playlist by either pushing to
-  currently playing or pushing the end of the upNext queue 
-  */
-  const filter = { _id: new ObjectID(playlist._id) };
-  const update = {};
+  const videoDoc = {
+    _id: new ObjectID(),
+    name: sanitizeName,
+    videoId,
+    userFullName,
+    playedAtTime: new Date()
+  };
 
-  let addTo;
-  if (
-    playlist.currentlyPlaying && 
-    playlist.currentlyPlaying.name
-    ) {
-    update.$push = { upNext: new ObjectID(video._id) }
-    addTo = 'queue'
-  }
-  
-  if (!playlist.currentlyPlaying.name) {
-    addTo = 'current'
-    update.$set = {
-      currentlyPlaying: video
-    }; 
+  const filter = {
+    _id: new ObjectID(auth.clubId)
   }
 
-  await updateDocument(Playlist, filter, update) 
-
-  const data = {
-    addedVideo: video,
-    addTo
+  const update = {
+    $push: { upNext: videoDoc }
   }
 
-  const clubSocket = io.of(`/${auth.clubId}`);
-  clubSocket.emit('addToPlaylist', data)
+  const updatedClub = await updateDocument(Club, filter, update) 
+  const lastVideo = updatedClub.upNext.pop()
+
+  const clubSocket = clubNs();
+  clubSocket.emit('addToPlaylist', { video: lastVideo })
   res.status(200).json({ message: "Video added" });
 });
 

@@ -27,6 +27,10 @@ img {
   width: 100%;
 }
 
+body {
+  background-color: var(--beige);
+}
+
 .u--center-content {
   display: flex;
   justify-content: center;
@@ -34,7 +38,7 @@ img {
 }
 
 input, select {
-  height: 3rem;
+  height: 3.5rem;
   font-size: 2.2rem;
   outline: none;
   border: none;
@@ -134,5 +138,7 @@ img {
   background-color: var(--light-yellow);
   color: var(--red);
   border-radius: 10px;
-  margin-top: 0;
+  font-size: 2rem;
+  font-weight: bolder;
+  
 }

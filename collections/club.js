@@ -1,3 +1,28 @@
+const video = {
+  bsonType: 'object',
+  required: ['name', 'videoId', 'userFullName', 'playedAtTime'],
+  properties: {
+    _id: {
+      bsonType: 'objectId'
+    },
+    name: {
+      bsonType: 'string',
+      description: 'A name is required'
+    },
+    videoId: {
+      bsonType: 'string',
+      description: 'A video id is required'
+    },
+    userFullName: {
+      bsonType: 'string',
+      description: 'The song requestor\'s name is required'
+    },
+    playedAtTime: {
+      bsonType: 'date',
+    }
+  }
+};
+
 module.exports = {
   name: 'club',
   validator: {
@@ -9,8 +34,13 @@ module.exports = {
           bsonType: 'string',
           description: 'A name is required'
         },
-        listeningHistory: {
-          bsonType: 'array'
+        history: {
+          bsonType: 'array',
+          items: video
+        },
+        upNext: {
+          bsonType: 'array',
+          items: video
         }
       }
     }

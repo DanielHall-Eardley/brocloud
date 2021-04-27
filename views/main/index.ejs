@@ -57,34 +57,29 @@
       </div>
     </section>
     <section class="main--playlist">
-      <ul>
-        <h3>Currently playing</h3>
-        <div class="main--playing">
-          <% if (currentlyPlaying && currentlyPlaying.name) { %>
-            <li>
-              <%= currentlyPlaying.name %>
-              <div class="main--name-highlight">
-                <%= currentlyPlaying.userFullName%>
-              </div>
+      <h3>Currently playing</h3>
+      <ul class='main--up-next'>
+        <% upNext.forEach((video, index ) => { %>
+          <li id="<%= video._id %>">
+            <% if (index === 0) { %>
               <input 
-                type="hidden" 
-                id="videoId" 
-                value="<%= currentlyPlaying.videoId %>"
+                type="hidden"
+                id="current-video"
+                value="<%= video.videoId %>"
               >
-            </li>
-          <% } %>
-        </div>
-        <h3>Up Next</h3>
-        <div class='main--up-next'>
-          <% playlist.forEach(video => { %>
-            <li>
-              <%= video.name %>
-              <div class="main--name-highlight">
-                <%= video.userFullName%>
-              </div>
-            </li>
-          <% }); %>
-        </div>
+            <% } else { %>
+              <input 
+                type="hidden"
+                class="next-video"
+                value="<%= video.videoId %>"
+              >
+            <% } %>
+            <%= video.name %>
+            <div class="main--name-highlight">
+              <%= video.userFullName%>
+            </div>
+          </li>
+        <% }); %>
       </ul>
     </section>
   </main>
@@ -92,15 +87,20 @@
     <h3>Listening History</h3>
     <ul class="main--history-list">
       <% history.forEach(video => { %>
-        <li id="<%= video.videoId %>">
+        <li id="<%= video._id %>">
+          <input 
+            type="hidden"
+            class="played-video"
+            value="<%= video.videoId %>"
+          >
           <button class="btn--result btn--history">
-            <p>
+            <p class="played-video--name">
               <%= video.name %>
             </p>
             <p>
               <%= video.userFullName %>
               <span class="main--timestamp">
-                | <%= video.timestamp %>
+                | <%= video.playedAtTime %>
               </span>
             </p>
           </button>

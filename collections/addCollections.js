@@ -1,13 +1,9 @@
 const userCollection = require('./user');
 const clubCollection = require('./club');
-const videoCollection = require('./video');
-const playListCollection = require('./playlist');
 
 const collectionArray = [
   userCollection, 
   clubCollection,
-  videoCollection,
-  playListCollection,
 ];
 
 const addCollections = db => {

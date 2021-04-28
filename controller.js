@@ -1,10 +1,9 @@
 const catchError = require('./util/catchError');
 const throwError = require('./util/throwError');
-const { format, differenceInDays } = require('date-fns');
 const fetch = require('node-fetch');
 const sanitizeHtml = require('sanitize-html');
-const Session = require('./sessionState');
 const { initClubSocket, clubNs } = require('./socketUtil');
+const formatTimestamp = require('./util/formatTimeStamp');
 
 const { 
   updateDocument,
@@ -20,26 +19,6 @@ const Club = dbConnection().collection('club');
 let youtubeApiKey = process.env.YOUTUBE_API_KEY  
 if (!youtubeApiKey) {
   youtubeApiKey = require('./keys').youtubeApiKey
-}
-
-const formatTimestamp = (timestamp) => {
-  const now = new Date();
-  const timeOfPost = new Date(timestamp);
-  const checkDay = differenceInDays(timeOfPost, now);
-
-  if (checkDay === 0) {
-    return `Today at ${format(timeOfPost, 'h:m aaa')}`;
-  }
-
-  if (checkDay === 1) {
-    return `Yesterday at ${format(timeOfPost, 'h:m aaa')}`;
-  }
-
-  if (checkDay > 1 && checkDay < 7) {
-    return format(timeOfPost, 'EEEE h:m aaa');
-  }
-
-  return format(timeOfPost, 'MMM do h:m aaa');
 }
 
 const extractIds = req => {

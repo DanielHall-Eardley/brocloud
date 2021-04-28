@@ -1,6 +1,7 @@
 const { updateDocument,dbConnection} = require('./setupUtil');
 const { ObjectID } = require('mongodb');
 const Session = require('./sessionState');
+const formatTimestamp = require('./util/formatTimeStamp');
 
 const Club = dbConnection().collection('club');
 
@@ -53,14 +54,15 @@ exports.queueNext = async (data, clubSocket) => {
   
   const updatedClub = await updateDocument(Club, filter, update);
   const newVideo = updatedClub.upNext.shift();
-
+  const rawDate = playedVideo.playedAtTime;
+  playedVideo.playedAtTime = formatTimestamp(rawDate);
   /*
   Send the next video to be played (newVideo)
   and the id of previous video for removal from the DOM  
   */
   const dataObj = {
     newVideo,
-    previousVideoId: playedVideo._id
+    previousVideo: playedVideo
   }
 
   clubSocket.emit('queueNext', dataObj);

@@ -33,8 +33,6 @@ function emitSeconds () {
   intervalId = setInterval(() => {
     const data = {
       currentPosition: player.getCurrentTime(),
-      clubId: user.clubId,
-      userId: user._id
     }
 
     clubSocket.emit('updateSync', data);

@@ -28,12 +28,12 @@ const SessionState = class SessionState {
   }
 
   removeMember(checkMemberId, clubId) {
-    const removeMember = this.clubs[clubId].members.filter(
-      memberId => memberId.toString() === checkMemberId.toString()
+    const membersLeft = this.clubs[clubId].members.filter(
+      memberId => memberId.toString() !== checkMemberId.toString()
     );
     
-    this.clubs[clubId].members = removeMember;
-    return removeMember;
+    this.clubs[clubId].members = membersLeft;
+    return membersLeft;
   }
 
   updateSeconds(seconds, userId, clubId) {

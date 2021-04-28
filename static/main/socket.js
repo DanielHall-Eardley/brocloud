@@ -4,7 +4,12 @@ const user = getUser();
 
 let clubSocket;
 function initSocket () {
-  clubSocket = io(`/${user.clubId}`)
+  clubSocket = io(`/${user.clubId}`, {
+    query: {
+      userId: user._id,
+      clubId: user.clubId
+    }
+  })
   clubSocket.on('connect', () => {
     console.log('Club socket connected');
     initYouTube()

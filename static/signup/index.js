@@ -18,7 +18,7 @@ async function formSubmit (event) {
   event.preventDefault();
   const signupType = event.submitter.name;
   const body = formState.formData();
-
+ 
   const dataObj = {
     body,
     url: signupType

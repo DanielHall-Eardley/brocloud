@@ -126,7 +126,7 @@ exports.getMusic = catchError(async (req, res, next) => {
     upNext: club.upNext
   };
 
-  initClubSocket(club._id);
+  initClubSocket(club._id, userId);
   res.render('./main/index.ejs', data);
 });
 

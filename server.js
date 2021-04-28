@@ -38,8 +38,9 @@ setupUtil.connect(initServer)
   .catch(error => { console.log(error)})
 
 
-
-
-
+/*
+  To do 
+  - timestamp error
+ */
 
 

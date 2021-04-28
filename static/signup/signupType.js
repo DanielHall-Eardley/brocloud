@@ -1,4 +1,5 @@
 function signupType (event, state) {
+  console.log(event, state)
   const signupBtn = document.querySelector("#signup--btn");
   signupBtn.innerText = ''
   

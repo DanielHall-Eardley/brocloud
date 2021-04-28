@@ -7,13 +7,17 @@ const initClubSocket = clubId => {
 
   clubSocket.on("connection", socket => {
     const forwardClubSocket = fn => (data) => {
-      fn(data, clubSocket)
+      if (data) {
+        fn(data, clubSocket, socket.handshake.query)
+      } else {
+        fn(clubSocket, socket.handshake.query)
+      } 
     }
 
     socket.on('setupClub', forwardClubSocket(socketController.setupClub))
     socket.on('updateSync', forwardClubSocket(socketController.updateSync));
     socket.on('queueNext', forwardClubSocket(socketController.queueNext));
-    socket.on('pageClose', forwardClubSocket(socketController.pageClose));
+    socket.on('disconnect', forwardClubSocket(socketController.pageClose));
   })
 };
 

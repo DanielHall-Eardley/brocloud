@@ -46,9 +46,9 @@ exports.joinClub = catchError(async (req, res, next) => {
     clubId
   } = req.body;
 
-  const checkClubExists = await Club.findOne({ _id: new ObjectID(clubId) })
+  const existingClub = await Club.findOne({ _id: new ObjectID(clubId) })
   
-  if (!checkClubExists) {
+  if (!existingClub) {
     return throwError('Club not found', 404);
   }
 
@@ -56,7 +56,7 @@ exports.joinClub = catchError(async (req, res, next) => {
     firstName,
     lastName,
     nickName,
-    clubId: new ObjectID(club._id)
+    clubId: new ObjectID(existingClub._id)
   };
   const savedUser = await addDocument(User, userDoc);
 
@@ -106,6 +106,10 @@ exports.getMusic = catchError(async (req, res, next) => {
     userPromise,
     clubPromise,
   ]);
+
+  if (!club) {
+    throwError('No club found', 404);
+  }
   
   const formattedHistory = club.history.map(video => {
       const timestamp = formatTimestamp(video.playedAtTime)

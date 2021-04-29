@@ -95,15 +95,20 @@ exports.createClub = catchError(async (req, res, next) => {
 
 exports.getMusic = catchError(async (req, res, next) => {
   const { clubId, userId } = req.params;
+  
+  const user = await User.findOne({ _id: new ObjectID(userId) });
+  if (!user) {
+    return res.redirect('/signup');
+  }
 
-  const userPromise = findDocuments(User, { clubId: new ObjectID(clubId) });
+  const membersPromise = findDocuments(User, { clubId: new ObjectID(clubId) });
   const clubPromise = Club.findOne({ _id: new ObjectID(clubId) });
 
   const [
     members, 
     club, 
   ] = await Promise.all([
-    userPromise,
+    membersPromise,
     clubPromise,
   ]);
 

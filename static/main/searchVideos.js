@@ -1,5 +1,5 @@
 import api from '../common/api';
-import { formState } from './index';
+import { formState } from './index.js';
 import createResultList from './createResultList'
 
 async function searchVideos (event) {

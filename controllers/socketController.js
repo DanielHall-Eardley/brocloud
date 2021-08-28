@@ -1,7 +1,7 @@
-const { updateDocument,dbConnection} = require('./setupUtil');
+const { updateDocument, dbConnection} = require('../util/setupUtil');
 const { ObjectID } = require('mongodb');
-const Session = require('./sessionState');
-const formatTimestamp = require('./util/formatTimeStamp');
+const Session = require('../util/sessionState');
+const formatTimestamp = require('../util/formatTimeStamp');
 
 const Club = dbConnection().collection('club');
 
@@ -23,7 +23,7 @@ exports.updateSync = (data, clubSocket, { userId, clubId }) => {
   clubSocket.emit('syncTrack', currentPosition);
 };
 
-exports.queueNext = async (clubSocket, { clubId }) => {
+exports.queueNext = async (clubSocket, { clubId, userId }) => {
   Session.resetSeconds(clubId)
   const filter = {
     _id: new ObjectID(clubId)
@@ -45,7 +45,7 @@ exports.queueNext = async (clubSocket, { clubId }) => {
   }
 
   //if the video is valid add to history
-  if (playedVideo) {
+  if (playedVideo && Session.checkMemberIsFirst(userId, clubId)) {
     update.$push = {
       history: playedVideo
     }

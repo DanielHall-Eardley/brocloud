@@ -23,6 +23,12 @@ module.exports = {
           maxLength: 20,
           description: 'Nickname required'
         },
+        password: {
+          bsonType: 'string',
+          minLength: 6,
+          maxLength: 20,
+          description: 'Password Required'
+        },
         clubId: {
           bsonType: 'objectId',
           description: 'Club id required'

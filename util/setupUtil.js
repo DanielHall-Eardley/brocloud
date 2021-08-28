@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/brocloud?poolSize=20';
-const addCollections = require('./collections/addCollections');
-const throwError = require('./util/throwError');
+const addCollections = require('../collections/addCollections');
+const throwError = require('../util/throwError');
 const socket = require('socket.io');
 
 let db;

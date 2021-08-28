@@ -22,6 +22,12 @@ const SessionState = class SessionState {
     )
   }
 
+  checkMemberIsFirst(checkMemberId, clubId) {
+    console.log(checkMemberId, clubId)
+    console.log(this)
+    return this.clubs[clubId].members[0] === checkMemberId;
+  }
+
   addMember(memberId, clubId) {
     this.clubs[clubId].members.push(memberId);
     return this.clubs[clubId].members

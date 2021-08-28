@@ -37,11 +37,11 @@ export default {
     return Promise.resolve(data)
   },
   search: async body => {
-    const data = await request('/search', body);
+    const data = await request('/youtube-api/search', body);
     return Promise.resolve(data)
   },
   addVideo: async body => {
-    const data = await request('/addVideo', body);
+    const data = await request('/music/addVideo', body);
     return Promise.resolve(data)
   },
 };

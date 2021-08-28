@@ -1,6 +1,7 @@
-import { FormState, host } from '../common/global.js';
+import { FormState, host } from '../common/global';
 import api from '../common/api';
 import signupType from './signupType';
+
 const formState = new FormState(signupType);
 
 window.onload = () => {
@@ -9,7 +10,8 @@ window.onload = () => {
     identifier: '.signup--club',
     childElementType: 'button',
     eventType: 'click'
-  }
+  };
+
   formState.init(form, extraListeners);
   form.addEventListener('submit', formSubmit);
 };
@@ -22,7 +24,7 @@ async function formSubmit (event) {
   const dataObj = {
     body,
     url: signupType
-  }
+  };
 
   const data = await api.signup(dataObj);
   

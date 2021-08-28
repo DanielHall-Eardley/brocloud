@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/signup/index.css">
+  <link rel="stylesheet" href="/signup/signup.css">
   <link rel="stylesheet" href="/common/global.css">
   <title>BroCloud</title>
 </head>
@@ -27,6 +27,9 @@
 
       <label for="club">Select a club to join</label>
       <div  id="club" class="signup--club">
+
+      <label for="password"> Enter a password</label>
+      <div  id="password" class="signup--password">
         <% clubs.forEach((club) => { %>
           <button 
             value="<%= club._id %>" 

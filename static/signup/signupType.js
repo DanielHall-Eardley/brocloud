@@ -17,4 +17,4 @@ function signupType (event, state) {
   }
 }
 
-export default signupType
+export default signupType;

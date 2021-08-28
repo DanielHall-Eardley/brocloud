@@ -1,5 +1,5 @@
 const { mainIo } = require('./setupUtil');
-const socketController = require('./socketController')
+const socketController = require('../controllers/socketController')
 
 let clubSocket;
 const initClubSocket = clubId => {

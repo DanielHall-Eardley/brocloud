@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const setupUtil = require('./setupUtil');
+const setupUtil = require('./util/setupUtil');
 
 const initServer = () => {
   app.set('view-engine', 'ejs');
@@ -18,8 +18,13 @@ const initServer = () => {
     res.sendFile(filePath);
   })
 
-  const routes = require('./routes');
-  app.use(routes);
+  const musicRoutes = require('./routes/musicRoutes');
+  const signupLoginRoutes = require('./routes/signupLoginRoutes');
+  const youtubeApiRoutes = require('./routes/youtubeApiRoutes');
+
+  app.use('/music', musicRoutes);
+  app.use('/signup', signupLoginRoutes);
+  app.use('/youtube-api', youtubeApiRoutes);
   app.use((error, req, res, next) => {
     console.log(error)
     const status = error.status || 500
@@ -41,6 +46,8 @@ setupUtil.connect(initServer)
 /*
   To do 
   - timestamp error
+  - update squad section when additional people sign up
+  - get people youtube login information to retrieve their playlists
  */
 
 

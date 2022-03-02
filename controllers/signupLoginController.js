@@ -1,8 +1,9 @@
 const catchError = require("../util/catchError");
 const throwError = require("../util/throwError");
 const bcrypt = require("bcrypt");
-let { youtubeApiKey, host } = require("../config/keys");
+let { youtubeApiKey } = require("../config/keys");
 const { createJWT } = require("../util/createJWT");
+const host = "https://bro-cloud.herokuapp.com";
 
 const {
   addDocument,

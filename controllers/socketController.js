@@ -1,6 +1,6 @@
 const { updateDocument, dbConnection} = require('../util/setupUtil');
 const { ObjectID } = require('mongodb');
-const Session = require('../util/sessionState');
+const Session = require('../util/sessionState')();
 const formatTimestamp = require('../util/formatTimeStamp');
 
 const Club = dbConnection().collection('club');
@@ -36,13 +36,14 @@ exports.queueNext = async (clubSocket, { clubId, userId }) => {
     return
   }
   const playedVideo = club.upNext.shift()
-
+  console.log('played video', playedVideo);
   //pull the played video from the queue
   const update = {
     $pull: {
       upNext: { _id: playedVideo._id }
     }
   }
+  console.log('First member', Session.checkMemberIsFirst(userId, clubId))
 
   //if the video is valid add to history
   if (playedVideo && Session.checkMemberIsFirst(userId, clubId)) {
@@ -53,8 +54,7 @@ exports.queueNext = async (clubSocket, { clubId, userId }) => {
   
   const updatedClub = await updateDocument(Club, filter, update);
   const newVideo = updatedClub.upNext.shift();
-  const rawDate = playedVideo.playedAtTime;
-  playedVideo.playedAtTime = formatTimestamp(rawDate);
+  playedVideo.playedAtTime = formatTimestamp(new Date());
   
   /*
   Send the next video to be played (newVideo)

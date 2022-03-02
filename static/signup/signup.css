@@ -3,19 +3,6 @@
   text-align: center;
 }
 
-.signup--form {
-  width: clamp(30rem, 50rem, 70rem);
-  padding: 2rem;
-  border-radius: 10px;
-}
-
-:is(.signup--form) label, input, select {
- display: block;
- width: 100%;
- margin-bottom: 1rem;
- font-size: 1.6rem;
-}
-
 .signup--btn-container {
   display: flex;
   justify-content: flex-end;
@@ -33,8 +20,8 @@
 .btn--club {
   background-color: var(--white);
   border: solid 1px var(--light-green);
-  padding: .5rem 1rem;
-  outline: none
+  padding: 0.5rem 1rem;
+  outline: none;
 }
 
 .btn--club:focus {

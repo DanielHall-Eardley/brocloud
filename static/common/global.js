@@ -1,10 +1,10 @@
 // export const host = 'http://localhost:3000';
-export const host = 'https://bro-cloud.herokuapp.com';
+export const host = "https://bro-cloud.herokuapp.com";
 
 export const FormState = class FormState {
-  constructor (customFn = null) {
+  constructor(customFn = null) {
     this.state = {};
-    this.customFn = customFn
+    this.customFn = customFn;
   }
 
   updateState(key, value) {
@@ -15,35 +15,34 @@ export const FormState = class FormState {
     const key = event.target.name;
     const value = event.target.value;
     const innerText = event.target.innerText;
-    this.updateState.apply(this, [key, value])
+
+    // Update the form state
+    this.updateState.apply(this, [key, value]);
+
+    /* Pass on the input data to an optional custom function
+    to implement any other behaviour which isn't updating the
+    form state */
     if (this.customFn) {
-      this.customFn({key, value, innerText}, this.state)
+      this.customFn({ key, value, innerText }, this.state);
     }
   }
 
   init(form, extraListeners) {
     const elements = form.children;
     for (let element of elements) {
-      if (
-        element.nodeName === 'INPUT' 
-        || element.nodeName === 'SELECT'
-      ) {
-        element.addEventListener('input', this.eventListener.bind(this))
+      if (element.nodeName === "INPUT" || element.nodeName === "SELECT") {
+        element.addEventListener("input", this.eventListener.bind(this));
       }
-    };
+    }
 
     if (extraListeners) {
-      const {
-        identifier,
-        childElementType,
-        eventType
-      } = extraListeners
+      const { identifier, childElementType, eventType } = extraListeners;
 
       const parent = document.querySelector(identifier);
-      const children = parent.getElementsByTagName(childElementType)
-    
+      const children = parent.getElementsByTagName(childElementType);
+
       for (let child of children) {
-        child.addEventListener(eventType, this.eventListener.bind(this))
+        child.addEventListener(eventType, this.eventListener.bind(this));
       }
     }
   }
@@ -51,14 +50,14 @@ export const FormState = class FormState {
   formData() {
     return this.state;
   }
-}
+};
 
 export const updateError = (error) => {
-    const errorNotif = document.querySelector('.error');
-    const errorMessage = document.createTextNode(error);
-    errorNotif.appendChild(errorMessage)
+  const errorNotif = document.querySelector(".error");
+  const errorMessage = document.createTextNode(error);
+  errorNotif.appendChild(errorMessage);
 
-    setTimeout(() => {
-      errorNotif.innerText = ''
-    }, 20000)
-  };
+  setTimeout(() => {
+    errorNotif.innerText = "";
+  }, 20000);
+};

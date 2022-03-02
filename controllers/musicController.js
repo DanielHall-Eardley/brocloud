@@ -91,7 +91,6 @@ exports.addVideo = catchError(async (req, res, next) => {
     name: sanitizeName,
     videoId,
     userFullName,
-    playedAtTime: new Date()
   };
 
   const filter = {

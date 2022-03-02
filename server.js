@@ -23,7 +23,7 @@ const initServer = () => {
   const youtubeApiRoutes = require('./routes/youtubeApiRoutes');
 
   app.use('/music', musicRoutes);
-  app.use('/signup', signupLoginRoutes);
+  app.use(signupLoginRoutes);
   app.use('/youtube-api', youtubeApiRoutes);
   app.use((error, req, res, next) => {
     console.log(error)

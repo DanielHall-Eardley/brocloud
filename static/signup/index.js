@@ -29,5 +29,6 @@ async function formSubmit (event) {
   const data = await api.signup(dataObj);
   
   localStorage.setItem('user', JSON.stringify(data.user));
+  localStorage.setItem('userSignedUp', true);
   window.location.replace(`${host}/music/${data.user.clubId}/${data.user._id}`);
 }

@@ -1,6 +1,6 @@
 const video = {
   bsonType: 'object',
-  required: ['name', 'videoId', 'userFullName', 'playedAtTime'],
+  required: ['name', 'videoId', 'userFullName'],
   properties: {
     _id: {
       bsonType: 'objectId'

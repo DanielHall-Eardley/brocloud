@@ -23,8 +23,6 @@ const SessionState = class SessionState {
   }
 
   checkMemberIsFirst(checkMemberId, clubId) {
-    console.log(checkMemberId, clubId)
-    console.log(this)
     return this.clubs[clubId].members[0] === checkMemberId;
   }
 
@@ -59,4 +57,17 @@ const SessionState = class SessionState {
   }
 };
 
-module.exports = new SessionState();
+const initSession = (() => {
+  let Session;
+
+  return () => {
+    if (!Session) {
+      Session = new SessionState()
+      return Session
+    }
+
+    return Session
+  }
+})();
+
+module.exports = initSession;

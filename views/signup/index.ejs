@@ -1,57 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/signup/signup.css">
-  <link rel="stylesheet" href="/common/global.css">
-  <title>BroCloud</title>
-</head>
-<body>
-  <h1 class="signup--title">Join your squad.</h1>
-  <p class="error"></p>
-  <main class="u--center-content">
-    <form  
-      method="POST"
-      class="signup--form"
-    >
-      <label for="firstName">Enter your first name</label>
-      <input type="text" id="firstName" name="firstName">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/signup/signup.css" />
+    <link rel="stylesheet" href="/common/global.css" />
+    <title>BroCloud</title>
+  </head>
+  <body>
+    <h1 class="signup--title">Join your squad.</h1>
+    <p class="error"></p>
+    <main class="u--center-content">
+      <form method="POST" class="entry-form">
+        <label for="firstName">Enter your first name</label>
+        <input type="text" id="firstName" name="firstName" />
 
-      <label for="lastName">Enter your last name</label>
-      <input type="text" id="lastName" name="lastName">
+        <label for="lastName">Enter your last name</label>
+        <input type="text" id="lastName" name="lastName" />
 
-      <label for="nickName">Enter your nick name</label>
-      <input type="text" id="nickName" name="nickName">
+        <label for="nickName">Enter your nick name</label>
+        <input type="text" id="nickName" name="nickName" />
 
-      <label for="club">Select a club to join</label>
-      <div  id="club" class="signup--club">
+        <label for="password"> Enter a password</label>
+        <input id="password" type="password" name="password" />
 
-      <label for="password"> Enter a password</label>
-      <div  id="password" class="signup--password">
-        <% clubs.forEach((club) => { %>
-          <button 
-            value="<%= club._id %>" 
+        <label for="club">Select a club to join</label>
+        <div id="club" class="signup--club">
+          <% clubs.forEach((club) => { %>
+          <button
+            value="<%= club._id %>"
             class="btn--club"
             name="clubId"
             type="button"
           >
             <%= club.name %>
           </button>
-        <% }); %>   
+          <% }); %>
         </div>
-      <h3>OR</h3>
-      <label for="clubName">Enter name of club to be created</label>
-      <input type="text" id="clubName" name="clubName">
-      <div class="signup--btn-container">
-        <button id="signup--btn" class="btn--primary" name="join">
-          Join club
-        </button>
-      </div>
-    </form>
-  </main>
-</body>
 
-<script src="/signup/index.js"></script>
+        <h3>OR</h3>
+
+        <label for="clubName">Enter name of club to be created</label>
+        <input type="text" id="clubName" name="clubName" />
+
+        <div class="signup--btn-container">
+          <button id="signup--btn" class="btn--primary" name="join">
+            Join club
+          </button>
+        </div>
+        <a href="<%= host %> + '/login'" class="entry-link"> Login </a>
+      </form>
+    </main>
+  </body>
+
+  <script src="/signup/index.js"></script>
 </html>

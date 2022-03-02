@@ -1,6 +1,5 @@
 const { MongoClient } = require('mongodb');
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/brocloud?poolSize=20';
-const addCollections = require('../collections/addCollections');
 const throwError = require('../util/throwError');
 const socket = require('socket.io');
 
@@ -30,13 +29,13 @@ const dbConnection = () => db;
 const mainIo = () => io;
 
 const findDocuments = (
-  db, query = {}, options = {} 
+  db, query = {}, options = {}, errorMsg='Document(s) not found'
 ) => {
   return new Promise(async (resolve, reject) => {
     const cursor = await db.find(query, options)
     const data = await cursor.toArray()
     if (!data) {
-      reject(throwError('Documents not found', 404));
+      reject(throwError(errorMsg, 404));
     }
 
     await cursor.close()

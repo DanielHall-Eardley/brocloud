@@ -14,6 +14,7 @@ const config = {
     './static/main/main.css',
     './static/signup/index.js',
     './static/signup/signup.css',
+    './static/login/login.css',
   ],
   entryNames: '[dir]/[name]',
   outdir: 'dist'

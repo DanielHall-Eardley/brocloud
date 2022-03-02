@@ -1,7 +1,7 @@
 const catchError = require("../util/catchError");
 const throwError = require("../util/throwError");
 const bcrypt = require("bcrypt");
-let { youtubeApiKey } = require("../config/keys");
+// let { youtubeApiKey } = require("../config/keys");
 const { createJWT } = require("../util/createJWT");
 const host = "https://bro-cloud.herokuapp.com";
 
@@ -16,9 +16,9 @@ const { ObjectID } = require("mongodb");
 const User = dbConnection().collection("user");
 const Club = dbConnection().collection("club");
 
-let checkEnvVar = process.env.YOUTUBE_API_KEY;
-if (checkEnvVar) {
-  youtubeApiKey = checkEnvVar;
+let youtubeApiKey = process.env.YOUTUBE_API_KEY;
+if (!youtubeApiKey) {
+  youtubeApiKey = require("../config/keys").youtubeApiKey;
 }
 
 exports.getSignup = catchError(async (req, res, next) => {

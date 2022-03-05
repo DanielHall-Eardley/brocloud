@@ -1,9 +1,10 @@
 const catchError = require("../util/catchError");
 const throwError = require("../util/throwError");
 const bcrypt = require("bcrypt");
-// let { youtubeApiKey } = require("../config/keys");
 const { createJWT } = require("../util/createJWT");
 const host = "https://bro-cloud.herokuapp.com";
+// const { youtubeApiKey } = require("../config/keys");
+const youtubeApiKey = process.env.YOUTUBE_API_KEY;
 
 const {
   addDocument,
@@ -15,11 +16,6 @@ const { ObjectID } = require("mongodb");
 
 const User = dbConnection().collection("user");
 const Club = dbConnection().collection("club");
-
-let youtubeApiKey = process.env.YOUTUBE_API_KEY;
-if (!youtubeApiKey) {
-  youtubeApiKey = require("../config/keys").youtubeApiKey;
-}
 
 exports.getSignup = catchError(async (req, res, next) => {
   const clubs = await findDocuments(Club);

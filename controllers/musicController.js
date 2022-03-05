@@ -3,6 +3,8 @@ const throwError = require("../util/throwError");
 const sanitizeHtml = require("sanitize-html");
 const { initClubSocket, clubNs } = require("../util/socketUtil");
 const formatTimestamp = require("../util/formatTimeStamp");
+// const { youtubeApiKey } = require("../config/keys");
+const youtubeApiKey = process.env.YOUTUBE_API_KEY;
 
 const {
   updateDocument,
@@ -22,11 +24,6 @@ const extractIds = (req) => {
     clubId,
   };
 };
-
-let youtubeApiKey = process.env.YOUTUBE_API_KEY;
-if (!youtubeApiKey) {
-  youtubeApiKey = require("../config/keys").youtubeApiKey;
-}
 
 exports.getMusic = catchError(async (req, res, next) => {
   const { clubId, userId } = req.params;

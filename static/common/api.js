@@ -1,12 +1,12 @@
-import { host, updateError } from './global.js';
-const user = JSON.parse(localStorage.getItem('user'))
+import { host, updateError } from "./global.js";
+const user = JSON.parse(localStorage.getItem("user"));
 
 const options = {
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
-  method: 'POST',
-}
+  method: "POST",
+};
 
 const request = async (url, body, method) => {
   if (user) {
@@ -19,29 +19,33 @@ const request = async (url, body, method) => {
   }
 
   if (method) {
-    options.method = method
-  }
-  
-  const res = await fetch(host + url, options)
-  if (res.status >= 200 && res.status <= 299) {
-    const data = await res.json()
-    return Promise.resolve(data)
+    options.method = method;
   }
 
-  updateError(res.error)
-}
+  const res = await fetch(host + url, options);
+  if (res.status >= 200 && res.status <= 299) {
+    const data = await res.json();
+    return Promise.resolve(data);
+  }
+
+  updateError(res.error);
+};
 
 export default {
-  signup: async obj => {
-    const data = await request(`/signup/${obj.url}`, obj.body);
-    return Promise.resolve(data)
+  signupJoin: async (body, clubId) => {
+    const data = await request(`/signup/join/${clubId}`, body);
+    return Promise.resolve(data);
   },
-  search: async body => {
-    const data = await request('/youtube-api/search', body);
-    return Promise.resolve(data)
+  signupCreate: async (body, clubName) => {
+    const data = await request(`/signup/create/${clubName}`, body);
+    return Promise.resolve(data);
   },
-  addVideo: async body => {
-    const data = await request('/music/addVideo', body);
-    return Promise.resolve(data)
+  search: async (body) => {
+    const data = await request("/youtube-api/search", body);
+    return Promise.resolve(data);
+  },
+  addVideo: async (body) => {
+    const data = await request("/music/addVideo", body);
+    return Promise.resolve(data);
   },
 };

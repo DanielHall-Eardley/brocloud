@@ -1,34 +1,24 @@
-import { FormState, host } from '../common/global';
-import api from '../common/api';
-import signupType from './signupType';
+import { FormState, host } from "../common/global";
+import { joinClubListener } from "./joinClubListener";
+import { createClubListener } from "./createClubListener";
+import { submitSignup } from "./submitSignup";
 
-const formState = new FormState(signupType);
+const formState = new FormState();
 
 window.onload = () => {
-  const form = document.querySelector('.signup--form');
-  const extraListeners = {
-    identifier: '.signup--club',
-    childElementType: 'button',
-    eventType: 'click'
-  };
-
-  formState.init(form, extraListeners);
-  form.addEventListener('submit', formSubmit);
+  const form = document.getElementsByTagName("form")[0];
+  formState.init(form);
+  form.addEventListener("submit", formSubmit);
+  joinClubListener();
+  createClubListener();
 };
 
-async function formSubmit (event) {
+async function formSubmit(event) {
   event.preventDefault();
-  const signupType = event.submitter.name;
   const body = formState.formData();
- 
-  const dataObj = {
-    body,
-    url: signupType
-  };
+  const data = await submitSignup(body);
 
-  const data = await api.signup(dataObj);
-  
-  localStorage.setItem('user', JSON.stringify(data.user));
-  localStorage.setItem('userSignedUp', true);
+  localStorage.setItem("user", JSON.stringify(data.user));
+  localStorage.setItem("userSignedUp", true);
   window.location.replace(`${host}/music/${data.user.clubId}/${data.user._id}`);
 }

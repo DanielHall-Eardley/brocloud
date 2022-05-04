@@ -3,7 +3,6 @@ const throwError = require("../util/throwError");
 const sanitizeHtml = require("sanitize-html");
 const { initClubSocket, clubNs } = require("../util/socketUtil");
 const formatTimestamp = require("../util/formatTimeStamp");
-// const { youtubeApiKey } = require("../config/keys");
 const youtubeApiKey = process.env.YOUTUBE_API_KEY;
 
 const {
@@ -43,6 +42,7 @@ exports.getMusic = catchError(async (req, res, next) => {
   }
 
   const formattedHistory = club.history.map((video) => {
+    console.log(video);
     const timestamp = formatTimestamp(video.playedAtTime);
     return {
       ...video,

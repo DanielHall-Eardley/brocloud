@@ -1,6 +1,5 @@
 const catchError = require("../util/catchError");
 const fetch = require("node-fetch");
-// const { youtubeApiKey } = require("../config/keys");
 const youtubeApiKey = process.env.YOUTUBE_API_KEY;
 
 exports.search = catchError(async (req, res, next) => {

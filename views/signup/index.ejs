@@ -25,28 +25,20 @@
         <label for="password"> Enter a password</label>
         <input id="password" type="password" name="password" />
 
-        <label for="club">Select a club to join</label>
-        <div id="club" class="signup--club">
+        <label for="clubs">Select a club to join</label>
+        <ul id="clubs" class="signup-join--club">
           <% clubs.forEach((club) => { %>
-          <button
-            value="<%= club._id %>"
-            class="btn--club"
-            name="clubId"
-            type="button"
-          >
-            <%= club.name %>
-          </button>
+          <li>
+            <button id="<%= club._id %>" type="button"><%= club.name %></button>
+          </li>
           <% }); %>
-        </div>
-
+        </ul>
         <h3>OR</h3>
-
         <label for="clubName">Enter name of club to be created</label>
-        <input type="text" id="clubName" name="clubName" />
-
+        <input type="text" class="signup-create--club" name="clubName" />
         <div class="signup--btn-container">
-          <button id="signup--btn" class="btn--primary" name="join">
-            Join club
+          <button id="signup-submit--btn" class="btn--primary">
+            Join Your Squad
           </button>
         </div>
         <a href="<%= host %> + '/login'" class="entry-link"> Login </a>

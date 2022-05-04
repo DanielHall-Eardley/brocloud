@@ -2,8 +2,7 @@ const catchError = require("../util/catchError");
 const throwError = require("../util/throwError");
 const bcrypt = require("bcrypt");
 const { createJWT } = require("../util/createJWT");
-const host = "https://bro-cloud.herokuapp.com";
-// const { youtubeApiKey } = require("../config/keys");
+const host = process.env.HOST;
 const youtubeApiKey = process.env.YOUTUBE_API_KEY;
 
 const {
@@ -89,8 +88,10 @@ exports.login = catchError(async (req, res, next) => {
 });
 
 exports.joinClub = catchError(async (req, res, next) => {
-  const { firstName, lastName, nickName, clubId, password } = req.body;
-
+  const clubId = req.params.clubId;
+  const { firstName, lastName, nickName, password } = req.body;
+  console.log({ clubId });
+  console.log(req.body);
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const existingClub = await Club.findOne({ _id: new ObjectID(clubId) });
@@ -116,8 +117,10 @@ exports.joinClub = catchError(async (req, res, next) => {
 });
 
 exports.createClub = catchError(async (req, res, next) => {
-  const { firstName, lastName, nickName, clubName, password } = req.body;
-
+  const clubName = req.params.clubName;
+  const { firstName, lastName, nickName, password } = req.body;
+  console.log({ clubName });
+  console.log(req.body);
   const hashedPassword = await bcrypt.hash(password, 10);
 
   if (!clubName) {

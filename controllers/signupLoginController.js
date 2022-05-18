@@ -87,42 +87,47 @@ exports.login = catchError(async (req, res, next) => {
   createJWT(user._id, cb);
 });
 
-exports.joinClub = catchError(async (req, res, next) => {
-  const clubId = req.params.clubId;
-  const { firstName, lastName, nickName, password } = req.body;
-  console.log({ clubId });
-  console.log(req.body);
+async function createUser(body, clubId) {
+  const { firstName, lastName, nickName, password } = body;
   const hashedPassword = await bcrypt.hash(password, 10);
-
-  const existingClub = await Club.findOne({ _id: new ObjectID(clubId) });
-
-  if (!existingClub) {
-    return throwError("Club not found", 404);
-  }
 
   const userDoc = {
     firstName,
     lastName,
     nickName,
-    clubId: new ObjectID(existingClub._id),
+    clubId: new ObjectID(clubId),
     password: hashedPassword,
   };
   const savedUser = await addDocument(User, userDoc);
 
-  const cb = () => {
-    res.status(200).json({ user: savedUser });
+  const sanitizedUser = {
+    firstName: savedUser.firstName,
+    lastName: savedUser.lastName,
+    nickName: savedUser.nickName,
+    clubId: savedUser.clubId,
+    _id: savedUser._id,
+  };
+
+  return sanitizedUser;
+}
+
+exports.joinClub = catchError(async (req, res, next) => {
+  const clubId = req.params.clubId;
+  const existingClub = await Club.findOne({ _id: new ObjectID(clubId) });
+  if (!existingClub) {
+    return throwError("Club not found", 404);
+  }
+
+  const user = await createUser(req.body, existingClub._id);
+
+  const cb = (token) => {
+    res.status(200).json({ user, token });
   };
 
   createJWT(savedUser._id, cb);
 });
 
-exports.createClub = catchError(async (req, res, next) => {
-  const clubName = req.params.clubName;
-  const { firstName, lastName, nickName, password } = req.body;
-  console.log({ clubName });
-  console.log(req.body);
-  const hashedPassword = await bcrypt.hash(password, 10);
-
+async function createClub(clubName) {
   if (!clubName) {
     return throwError("New club must have a name", 403);
   }
@@ -133,18 +138,15 @@ exports.createClub = catchError(async (req, res, next) => {
     upNext: [],
   };
   const club = await addDocument(Club, clubDoc);
+  return club;
+}
 
-  const userDoc = {
-    firstName,
-    lastName,
-    nickName,
-    clubId: new ObjectID(club._id),
-    password: hashedPassword,
-  };
-  const savedUser = await addDocument(User, userDoc);
+exports.createClub = catchError(async (req, res, next) => {
+  const club = await createClub(req.params.clubName);
+  const user = await createUser(req.body, club._id);
 
-  const cb = () => {
-    res.status(200).json({ user: savedUser });
+  const cb = (token) => {
+    res.status(200).json({ user, token });
   };
 
   createJWT(savedUser._id, cb);

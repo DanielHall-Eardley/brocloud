@@ -48,5 +48,5 @@ setupUtil.connect(initServer).catch((error) => {
   To do 
   - update squad section when additional people sign up
   - get people youtube login information to retrieve their playlists
-  - remove password from local storage
+  - create auth protection route
  */

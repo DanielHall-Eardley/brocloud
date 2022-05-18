@@ -42,7 +42,6 @@ exports.getMusic = catchError(async (req, res, next) => {
   }
 
   const formattedHistory = club.history.map((video) => {
-    console.log(video);
     const timestamp = formatTimestamp(video.playedAtTime);
     return {
       ...video,

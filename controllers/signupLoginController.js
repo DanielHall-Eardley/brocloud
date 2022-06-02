@@ -124,7 +124,7 @@ exports.joinClub = catchError(async (req, res, next) => {
     res.status(200).json({ user, token });
   };
 
-  createJWT(savedUser._id, cb);
+  createJWT(user._id, cb);
 });
 
 async function createClub(clubName) {
@@ -149,5 +149,5 @@ exports.createClub = catchError(async (req, res, next) => {
     res.status(200).json({ user, token });
   };
 
-  createJWT(savedUser._id, cb);
+  createJWT(user._id, cb);
 });

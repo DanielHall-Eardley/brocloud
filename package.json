@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "music sharing for bros",
   "main": "index.js",
+  "engines": {
+    "node": "16.x"
+  },
   "scripts": {
     "start": "webpack --config webpack.config.js --watch"
   },

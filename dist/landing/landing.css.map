@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../static/landing/landing.css"],
+  "sourcesContent": [".landing--main-title {\n  text-align: center;\n  font-size: 5rem;\n}\n\n.landing--img {\n  width: 60%;\n  border-radius: 10px;\n}\n\n.landing--subtitle {\n  color: var(--dark-green);\n  font-size: 3rem;\n}"],
+  "mappings": "AAAA,qBACE,kBACA,eAGF,cACE,UANF,mBAUA,mBACE,wBACA",
+  "names": []
+}

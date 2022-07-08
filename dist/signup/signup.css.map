@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../static/signup/signup.css"],
+  "sourcesContent": [".signup--title {\n  text-transform: capitalize;\n  text-align: center;\n}\n\n.signup--btn-container {\n  display: flex;\n  justify-content: flex-end;\n}\n\n.signup--club {\n  background-color: var(--beige);\n  border-radius: 10px;\n  display: grid;\n  gap: 1rem;\n  grid-template-columns: repeat(auto-fit, minmax(min-content, 1fr));\n  margin-bottom: 1rem;\n}\n\n.btn--club {\n  background-color: var(--white);\n  border: solid 1px var(--light-green);\n  padding: 0.5rem 1rem;\n  outline: none;\n}\n\n.btn--club:focus {\n  background-color: var(--dark-green);\n  color: var(--white);\n}\n"],
+  "mappings": "AAAA,eACE,0BACA,kBAGF,uBACE,aACA,yBAGF,cACE,8BAXF,mBAaE,aACA,SACA,+DACA,mBAGF,WACE,8BACA,oCArBF,mBAuBE,aAGF,iBACE,mCACA",
+  "names": []
+}

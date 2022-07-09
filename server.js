@@ -49,4 +49,7 @@ setupUtil.connect(initServer).catch((error) => {
   - update squad section when additional people sign up
   - get people youtube login information to retrieve their playlists
   - create auth protection route
+  - Change the way the history is added every time a song finishes
+  check if it is in the history if it is update the played at time,
+  if not add the song.
  */

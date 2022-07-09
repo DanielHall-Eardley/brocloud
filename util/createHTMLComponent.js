@@ -3,9 +3,8 @@
   [
     {
       name: "html element",
-      attributes: [
-        { attName: "attribute name", attValue: "attribute value"}
-      ],
+      attributes: 
+        { attName: attValue }
       content: "inner text"
       children: [
         repeat Object

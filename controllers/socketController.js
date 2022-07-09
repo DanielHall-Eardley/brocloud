@@ -27,93 +27,99 @@ exports.updateSync = (data, clubSocket, { userId, clubId }) => {
   clubSocket.emit("syncTrack", currentPosition);
 };
 
-function removeByIndex (array, index) {
+function removeByIndex(array, index) {
   const startPortion = array.slice(0, index);
   const endPortion = array.slice(index + 1);
   return [...startPortion, ...endPortion];
 }
 
-function playlistState (current, history, videoId) {
-  let updatedPlaylist = current
+function playlistState(current, history, videoId) {
+  let updatedPlaylist = current;
   let updatedHistory = history;
-  
+
   function checkVideoID(video) {
     return video.videoId.toString() === videoId.toString();
   }
 
   const playedVideoIndex = current.findIndex(checkVideoID);
   const historyVideoIndex = history.findIndex(checkVideoID);
+  const video = current[playedVideoIndex];
 
-  function checkIfDone() {
-    return historyVideoIndex > -1 && historyVideoIndex < 1;
-  }
+  return {
+    checkIfDone() {
+      return historyVideoIndex > -1 && historyVideoIndex < 1;
+    },
 
-  function checkVideoInHistory () {
-    return historyVideoIndex > 1;
-  }
+    checkVideoInHistory() {
+      return historyVideoIndex > 1;
+    },
 
-  function checkCurrentVideoExists () {
-    return playedVideoIndex > -1;
-  }
+    checkCurrentVideoExists() {
+      return playedVideoIndex > -1;
+    },
 
-  function addNewVideoToHistory () {
-    const video = current[playedVideoIndex];
-    updatedPlaylist = removeByIndex(current, playedVideoIndex);
-    updatedHistory = [video, ...history];
-  }
+    addNewVideoToHistory() {
+      updatedPlaylist = removeByIndex(current, playedVideoIndex);
+      updatedHistory = [video, ...history];
+    },
 
-  function data() {
-    return {
-      upNext: updatedPlaylist,
-      history: updatedHistory
-    }
-  }
+    updateVideoInHistory() {
+      const filteredHistory = removeByIndex(history, historyVideoIndex);
+      updatedPlaylist = removeByIndex(current, playedVideoIndex);
+      updatedHistory = [video, ...filteredHistory];
+    },
+
+    data() {
+      return {
+        upNext: updatedPlaylist,
+        history: updatedHistory,
+      };
+    },
+  };
 }
 
-exports.queueNext = async ({ videoId }, clubSocket, { clubId, userId }) => {
+async function updatePlaylist(data, db = Club) {
+  const update = {
+    $set: {
+      upNext: data.upNext,
+      history: data.history,
+    },
+  };
+
+  const updatedClub = await updateDocument(Club, query, update);
+  return {
+    upNext: updatedClub.upNext,
+    history: updatedClub.history,
+  };
+}
+
+exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
   Session.resetSeconds(clubId);
 
   const query = {
     _id: new ObjectID(clubId),
   };
 
-  const club = await findDocuments(Club, query);
-  const playlist = playlistState(club.upNext, club.history, videoId);
+  const { upNext, history } = await findDocuments(Club, query);
+  const playlist = playlistState(upNext, history, videoId);
+
   if (playlist.checkIfDone()) {
-    return clubSocket.emit('queueNext', playlist.data())
+    return clubSocket.emit("queueNext", playlist.data());
   }
 
   if (playlist.checkCurrentVideoExists() && !playlist.checkVideoInHistory()) {
-    playlist.addNewVideoToHistory()
-    const { upNext, history } = playlist.data()
-    const update = {
-      $set: {
-        upNext,
-        history
-      }
-    }
-    const updatedClub = await updateDocument(Club, query, update)
-    return clubSocket.emit('queueNext', {
-      upNext: updatedClub.upNext,
-      history: updatedClub.history
-    })
+    playlist.addNewVideoToHistory();
+    const data = await updatePlaylist(playlist.data());
+    return clubSocket.emit("queueNext", data);
   }
 
-  const startPortion = club.history.slice(0, historyVideoIndex);
-  const endPortion = club.history.slice(historyVideoIndex + 1);
-  const updatedVideo = {
-    playedAtTime: new Date(),
-    ...club.history[historyVideoIndex],
-  };
-  updatedHistory = [updatedVideo, ...startPortion, ...endPortion];
-  const update = {
-    $set: {
-      upNext: 
-    }
+  if (playlist.checkCurrentVideoExists() && playlist.checkVideoInHistory()) {
+    playlist.updateVideoInHistory();
+    const data = await updatePlaylist(playlist.data());
+    return clubSocket.emit("queueNext", data);
   }
-  const updatedCLub = await updateDocument(Club, query, update)
 
-  clubSocket.emit("queueNext", dataObj);
+  clubSocket.emit("queueNext", { upNext, history });
 };
 
 exports.pageClose = (data, clubSocket, { userId, clubId }) => {

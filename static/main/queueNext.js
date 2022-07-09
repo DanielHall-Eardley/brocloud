@@ -1,52 +1,56 @@
-import { player } from './youTube'
+import { player } from "./youTube";
+import { createHTMLComponent } from "../../util/createHTMLComponent";
 
-function queueNext (data) {
-  console.log(data)
-  const { newVideo, previousVideo } = data
-  if (newVideo) {
-    player.loadVideoById(newVideo.videoId)
+function createQueueVideo(video) {
+  const videoElement = [
+    {
+      name: "li",
+      attributes: [{ id: video._id }],
+      content: video.name,
+      children: [
+        {
+          name: "input",
+          attributes: [
+            {
+              type: "hidden",
+              class: "next-video",
+              value: video.videoId,
+            },
+          ],
+        },
+        {
+          name: "div",
+          content: video.userFullName,
+          attributes: [
+            {
+              class: "main--name-highlight",
+              value: video.videoId,
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  return videoElement;
+}
+
+function createHistoryVideo(video) {}
+
+function queueNext(data) {
+  const { upNext, history } = data;
+  const videoToPlay = data.upNext[0];
+  if (!videoToPlay) return;
+  player.loadVideoById(videoToPlay.videoId);
+
+  const upNextContainer = document.querySelector(".main--up-next");
+  const historyContainer = document.querySelector(".main--history-list");
+
+  for (let video of upNext) {
   }
 
-  const upNext = document.querySelector('.main--up-next');
-  const history = document.querySelector('.main--history-list');
-  const children = upNext.getElementsByTagName('li');
-
-  for (let li of children) {
-    if (li.getAttribute('id').toString() == previousVideo._id.toString()) {
-      upNext.removeChild(li);
-      li.innerText = '';
-
-      const hiddenInput = document.createElement('input')
-      hiddenInput.setAttribute('type', 'hidden');
-      hiddenInput.setAttribute('class', 'played-video');
-      hiddenInput.setAttribute('value', previousVideo.videoId);
-
-      const button = document.createElement('button')
-      button.setAttribute('class', 'btn--result btn--history');
-
-      const pName = document.createElement('p')
-      pName.setAttribute('class', 'played-video--name');
-      const name = document.createTextNode(previousVideo.name)
-      pName.appendChild(name)
-
-      const pUserName = document.createElement('p')
-      const username = document.createTextNode(`${previousVideo.userFullName} | `)
-      pUserName.appendChild(username)
-
-      const spanTimestamp = document.createElement('span')
-      spanTimestamp.setAttribute('class', 'main--timestamp');
-      const timestamp = document.createTextNode(previousVideo.playedAtTime);
-      spanTimestamp.appendChild(timestamp);
-      
-      pUserName.appendChild(spanTimestamp);
-      button.appendChild(pName);
-      button.appendChild(pUserName);
-      li.appendChild(hiddenInput);
-      li.appendChild(button);
-   
-      history.prepend(li);
-    }
-  }  
+  for (let video of history) {
+  }
 }
 
 export default queueNext;

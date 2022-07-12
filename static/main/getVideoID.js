@@ -1,6 +1,9 @@
 function getVideoID() {
   const videoInfoElement = document.querySelector("#current-video");
-  return videoInfoElement.getAttribute("value");
+  if (videoInfoElement) {
+    return videoInfoElement.getAttribute("value");
+  }
+  return false;
 }
 
 export default getVideoID;

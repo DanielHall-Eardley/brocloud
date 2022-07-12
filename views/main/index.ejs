@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/main/main.css">
-  <link rel="stylesheet" href="/common/global.css">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="manifest" href="/site.webmanifest">
-  <title>Music</title>
-</head>
-<body class="main--container">
-  <header>
-    <h1 class="main-title">
-      <span>BroCloud</span> |
-      <span class="main--club-highlight">
-        <%= club.name %>
-      </span>
-      <p class="error"></p>
-    </h1>
-  </header>
-  <aside class="main--squad">
-    <h3>Squad</h3>
-    <ul class="main--squad-list">
-      <% members.forEach(member => { %>
-        <li id="<%= member._id %>" >
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/main/main.css" />
+    <link rel="stylesheet" href="/common/global.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <title>Music</title>
+  </head>
+  <body class="main--container">
+    <header>
+      <h1 class="main-title">
+        <span>BroCloud</span> |
+        <span class="main--club-highlight"> <%= club.name %> </span>
+        <p class="error"></p>
+      </h1>
+    </header>
+    <aside class="main--squad">
+      <h3>Squad</h3>
+      <ul class="main--squad-list">
+        <% members.forEach(member => { %>
+        <li id="<%= member._id %>">
           <span>
             <%= member.firstName %>
             <q> <%= member.nickName %></q>
@@ -34,82 +32,71 @@
           </span>
           <span class="u--red-circle"></span>
         </li>
-      <% }); %>
-    </ul>
-  </aside>
-  <main>
-    <form class="main--search">
-      <input 
-        name="searchQuery" 
-        type="text" 
-        placeholder="Search for a song"
-      >
-      <button class="btn--primary">Search</button>
-    </form>
-    <section>
-      <h3>Search results</h3>
-      <div class="main--search-results"></div>
-    </section>
-    <section class="main--video">
-      <h3>Video</h3>
-      <div class="u--center-content">
-        <div id="player"></div>
-      </div>
-    </section>
-    <section class="main--playlist">
-      <h3>Currently playing</h3>
-      <ul class='main--up-next'>
-        <% upNext.forEach((video, index ) => { %>
-          <li id="<%= video._id %>">
-            <% if (index === 0) { %>
-              <input 
-                type="hidden"
-                id="current-video"
-                value="<%= video.videoId %>"
-              >
-            <% } else { %>
-              <input 
-                type="hidden"
-                class="next-video"
-                value="<%= video.videoId %>"
-              >
-            <% } %>
-            <%= video.name %>
-            <div class="main--name-highlight">
-              <%= video.userFullName%>
-            </div>
-          </li>
         <% }); %>
       </ul>
-    </section>
-  </main>
-  <aside class="main--history">
-    <h3>Listening History</h3>
-    <ul class="main--history-list">
-      <% history.forEach(video => { %>
+    </aside>
+    <main>
+      <form class="main--search">
+        <input name="searchQuery" type="text" placeholder="Search for a song" />
+        <button class="btn--primary">Search</button>
+      </form>
+      <section>
+        <h3>Search results</h3>
+        <div class="main--search-results"></div>
+      </section>
+      <section class="main--video">
+        <h3>Video</h3>
+        <div class="u--center-content">
+          <div id="player"></div>
+        </div>
+      </section>
+      <section class="main--playlist">
+        <h3>Currently playing</h3>
+        <ul class="main--up-next">
+          <% upNext.forEach((video, index ) => { %>
+          <li id="<%= video._id %>">
+            <% if (index > -1 && index < 1) { %>
+            <input
+              type="hidden"
+              id="current-video"
+              value="<%= video.videoId %>"
+            />
+            <% } else { %>
+            <input
+              type="hidden"
+              class="next-video"
+              value="<%= video.videoId %>"
+            />
+            <% } %> <%= video.name %>
+            <div class="main--name-highlight"><%= video.userFullName %></div>
+          </li>
+          <% }); %>
+        </ul>
+      </section>
+    </main>
+    <aside class="main--history">
+      <h3>Listening History</h3>
+      <ul class="main--history-list">
+        <% history.forEach(video => { %>
         <li id="<%= video._id %>">
-          <input 
+          <input
             type="hidden"
             class="played-video"
             value="<%= video.videoId %>"
-          >
+          />
           <button class="btn--result btn--history">
-            <p class="played-video--name">
-              <%= video.name %>
-            </p>
+            <p class="played-video--name"><%= video.name %></p>
             <p>
               <%= video.userFullName %>
-              <span class="main--timestamp">
-                | <%= video.playedAtTime %>
-              </span>
+              <span class="main--timestamp"> | <%= video.playedAtTime %> </span>
             </p>
           </button>
         </li>
-      <% }); %>
-    </ul>
-  </aside>
-</body>
-<script src="/socket.io/socket.io.js"></script>
-<script src="https://www.youtube.com/iframe_api"></script>
-<script src="/main/index.js"></script>
+        <% }); %>
+      </ul>
+    </aside>
+  </body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="/main/index.js"></script>
 </html>

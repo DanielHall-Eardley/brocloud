@@ -17,7 +17,7 @@ function onYouTubeIframeAPIReady() {
     videoId: currentPlayingVideoId,
     playerVars: {
       cc_load_policy: 0,
-      controls: 0,
+      // controls: 0,
       disablekb: 1,
       enablejsapi: 1,
       fs: 0,

@@ -1,11 +1,12 @@
 import { player } from "./youTube";
 import { createHTMLComponent } from "../../util/createHTMLComponent";
+import formatTimestamp from "../../util/formatTimeStamp";
 
 function createQueueVideo(video) {
   const videoElement = [
     {
       name: "li",
-      attributes: [{ id: video._id }],
+      attributes: { id: video._id },
       content: video.name,
       children: [
         {
@@ -14,7 +15,7 @@ function createQueueVideo(video) {
             type: "hidden",
             class: "next-video",
             value: video.videoId,
-          }
+          },
         },
         {
           name: "div",
@@ -22,7 +23,7 @@ function createQueueVideo(video) {
           attributes: {
             class: "main--name-highlight",
             value: video.videoId,
-          }
+          },
         },
       ],
     },
@@ -31,11 +32,11 @@ function createQueueVideo(video) {
   return videoElement;
 }
 
-function createPlayingVideo () {
+function createPlayingVideo(video) {
   const videoElement = [
     {
       name: "li",
-      attributes: [{ id: video._id }],
+      attributes: { id: video._id },
       content: video.name,
       children: [
         {
@@ -44,7 +45,7 @@ function createPlayingVideo () {
             type: "hidden",
             id: "current-video",
             value: video.videoId,
-          }
+          },
         },
         {
           name: "div",
@@ -52,7 +53,7 @@ function createPlayingVideo () {
           attributes: {
             class: "main--name-highlight",
             value: video.videoId,
-          }         
+          },
         },
       ],
     },
@@ -73,7 +74,7 @@ function createHistoryVideo(video) {
             type: "hidden",
             class: "played-video",
             value: video.videoId,
-          }
+          },
         },
         {
           name: "button",
@@ -82,22 +83,22 @@ function createHistoryVideo(video) {
           },
           children: [
             {
-              name: 'p',
-              attributes: { class: 'played-video--name'},
-              content: video.name
+              name: "p",
+              attributes: { class: "played-video--name" },
+              content: video.name,
             },
             {
-              name: 'p',
+              name: "p",
               content: video.userFullName,
               children: [
                 {
-                  name: 'span',
-                  attributes: { class: 'main--timestamp'},
-                  content: video.playedAtTime
-                }
-              ]
+                  name: "span",
+                  attributes: { class: "main--timestamp" },
+                  content: video.playedAtTime,
+                },
+              ],
             },
-          ]
+          ],
         },
       ],
     },
@@ -105,33 +106,45 @@ function createHistoryVideo(video) {
 
   return videoElement;
 }
+function formatDate(date) {
+  if (date) {
+    return formatTimestamp(date);
+  }
+
+  return null;
+}
 
 function queueNext(data) {
   const { upNext, history } = data;
   const videoToPlay = data.upNext[0];
-  if (!videoToPlay) return;
-  player.loadVideoById(videoToPlay.videoId);
 
   const upNextContainer = document.querySelector(".main--up-next");
   const historyContainer = document.querySelector(".main--history-list");
 
-  upNextContainer.innerHTML = '';
-  historyContainer.innerHTML = '';
+  if (videoToPlay) {
+    player.loadVideoById(videoToPlay.videoId);
+    upNext.forEach((video, index) => {
+      video.playedAtTime = formatDate(video.playedAtTime);
 
-  upNext.forEach((video, index) => {
-    if (index > -1 && index < 1) {
-      const htmlVideoElement = createHTMLComponent(createPlayingVideo(video));
-      upNextContainer.append(htmlVideoElement);
-    }
+      if (index > -1 && index < 1) {
+        const htmlVideoElement = createHTMLComponent(createPlayingVideo(video));
+        upNextContainer.append(htmlVideoElement);
+      } else {
+        const htmlVideoElement = createHTMLComponent(createQueueVideo(video));
+        upNextContainer.append(htmlVideoElement);
+      }
+    });
+  }
 
-    const htmlVideoElement = createHTMLComponent(createQueueVideo(video));
-    upNextContainer.append(htmlVideoElement);
-  })
+  upNextContainer.innerHTML = "";
+  historyContainer.innerHTML = "";
 
-  history.forEach(video => {
+  history.forEach((video) => {
+    video.playedAtTime = formatDate(video.playedAtTime);
     const htmlVideoElement = createHTMLComponent(createHistoryVideo(video));
     historyContainer.append(htmlVideoElement);
-  })  
+    //need to add button click listeners
+  });
 }
 
 export default queueNext;

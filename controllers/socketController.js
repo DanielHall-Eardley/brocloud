@@ -6,6 +6,7 @@ const {
 const { ObjectID } = require("mongodb");
 const Session = require("../util/sessionState")();
 const formatTimestamp = require("../util/formatTimeStamp");
+const { vi } = require("date-fns/locale");
 
 const Club = dbConnection().collection("club");
 
@@ -43,7 +44,10 @@ function playlistState(current, history, videoId) {
 
   const playedVideoIndex = current.findIndex(checkVideoID);
   const historyVideoIndex = history.findIndex(checkVideoID);
-  const video = current[playedVideoIndex];
+  const video = {
+    ...current[playedVideoIndex],
+    playedAtTime: new Date(),
+  };
 
   return {
     checkIfDone() {
@@ -51,7 +55,7 @@ function playlistState(current, history, videoId) {
     },
 
     checkVideoInHistory() {
-      return historyVideoIndex > 1;
+      return historyVideoIndex > -1;
     },
 
     checkCurrentVideoExists() {
@@ -59,12 +63,16 @@ function playlistState(current, history, videoId) {
     },
 
     addNewVideoToHistory() {
+      console.log("new");
       updatedPlaylist = removeByIndex(current, playedVideoIndex);
       updatedHistory = [video, ...history];
     },
 
     updateVideoInHistory() {
-      const filteredHistory = removeByIndex(history, historyVideoIndex);
+      console.log("exists");
+      const filteredHistory = history.filter(
+        (v) => v.videoId.toString() !== videoId.toString()
+      );
       updatedPlaylist = removeByIndex(current, playedVideoIndex);
       updatedHistory = [video, ...filteredHistory];
     },
@@ -78,7 +86,7 @@ function playlistState(current, history, videoId) {
   };
 }
 
-async function updatePlaylist(data, db = Club) {
+async function updatePlaylist(data, query, db = Club) {
   const update = {
     $set: {
       upNext: data.upNext,
@@ -86,7 +94,7 @@ async function updatePlaylist(data, db = Club) {
     },
   };
 
-  const updatedClub = await updateDocument(Club, query, update);
+  const updatedClub = await updateDocument(db, query, update);
   return {
     upNext: updatedClub.upNext,
     history: updatedClub.history,
@@ -95,27 +103,29 @@ async function updatePlaylist(data, db = Club) {
 
 exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
   Session.resetSeconds(clubId);
+  if (!videoId || videoId === "false") return;
 
   const query = {
     _id: new ObjectID(clubId),
   };
 
-  const { upNext, history } = await findDocuments(Club, query);
+  const result = await findDocuments(Club, query);
+  const { upNext, history } = result[0];
   const playlist = playlistState(upNext, history, videoId);
 
-  if (playlist.checkIfDone()) {
+  if (!playlist.checkCurrentVideoExists() && playlist.checkIfDone()) {
     return clubSocket.emit("queueNext", playlist.data());
   }
 
   if (playlist.checkCurrentVideoExists() && !playlist.checkVideoInHistory()) {
     playlist.addNewVideoToHistory();
-    const data = await updatePlaylist(playlist.data());
+    const data = await updatePlaylist(playlist.data(), query);
     return clubSocket.emit("queueNext", data);
   }
 
   if (playlist.checkCurrentVideoExists() && playlist.checkVideoInHistory()) {
     playlist.updateVideoInHistory();
-    const data = await updatePlaylist(playlist.data());
+    const data = await updatePlaylist(playlist.data(), query);
     return clubSocket.emit("queueNext", data);
   }
 

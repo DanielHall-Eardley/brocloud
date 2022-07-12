@@ -106,13 +106,6 @@ function createHistoryVideo(video) {
 
   return videoElement;
 }
-function formatDate(date) {
-  if (date) {
-    return formatTimestamp(date);
-  }
-
-  return null;
-}
 
 function queueNext(data) {
   const { upNext, history } = data;
@@ -121,10 +114,13 @@ function queueNext(data) {
   const upNextContainer = document.querySelector(".main--up-next");
   const historyContainer = document.querySelector(".main--history-list");
 
+  upNextContainer.innerHTML = "";
+  historyContainer.innerHTML = "";
+
   if (videoToPlay) {
     player.loadVideoById(videoToPlay.videoId);
     upNext.forEach((video, index) => {
-      video.playedAtTime = formatDate(video.playedAtTime);
+      video.playedAtTime = formatTimestamp(video.playedAtTime);
 
       if (index > -1 && index < 1) {
         const htmlVideoElement = createHTMLComponent(createPlayingVideo(video));
@@ -136,11 +132,8 @@ function queueNext(data) {
     });
   }
 
-  upNextContainer.innerHTML = "";
-  historyContainer.innerHTML = "";
-
   history.forEach((video) => {
-    video.playedAtTime = formatDate(video.playedAtTime);
+    video.playedAtTime = formatTimestamp(video.playedAtTime);
     const htmlVideoElement = createHTMLComponent(createHistoryVideo(video));
     historyContainer.append(htmlVideoElement);
     //need to add button click listeners

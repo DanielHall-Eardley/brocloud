@@ -1,51 +1,21 @@
-import { player } from './youTube';
-import { clubSocket } from './socket';
-import { club } from './updateClubState';
-import getUser from './getUser';
-const user = getUser();
+import { player } from "./youTube";
+import { clubSocket } from "./socket";
 
 let intervalId;
-let sync = false;
-let trackPosition = 0;
 
-function startSync () {
-  const firstMemberId = club.members[0];
-    if (firstMemberId.toString() === user._id.toString()) {
-      emitSeconds();
-    } else if (!sync) {
-        const currentTime = player.getCurrentTime();
-        if (
-          trackPosition > currentTime || 
-          trackPosition < currentTime
-        ) {
-          player.seekTo(trackPosition, true)
-          sync = true
-        }
-    }
+function stopSync() {
+  clearInterval(intervalId);
 }
 
-function stopSync () {
-  clearInterval(intervalId)
-  sync = false;
-}
-
-function emitSeconds () {
+function startSync() {
   intervalId = setInterval(() => {
-    const data = {
-      currentPosition: player.getCurrentTime(),
-    }
-
-    clubSocket.emit('updateSync', data);
-  }, 500)
+    const currentPosition = player.getCurrentTime();
+    clubSocket.emit("updateSync", currentPosition);
+  }, 500);
 }
 
-function updateTrackPosition (position) {
-  trackPosition = position
+function updateTrackPosition(trackPosition) {
+  player.seekTo(trackPosition, true);
 }
 
-export {
-  stopSync,
-  emitSeconds,
-  updateTrackPosition,
-  startSync
-}
+export { stopSync, updateTrackPosition, startSync };

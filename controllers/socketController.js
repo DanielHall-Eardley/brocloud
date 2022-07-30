@@ -6,7 +6,6 @@ const {
 const { ObjectID } = require("mongodb");
 const Session = require("../util/sessionState")();
 const formatTimestamp = require("../util/formatTimeStamp");
-const { vi } = require("date-fns/locale");
 
 const Club = dbConnection().collection("club");
 
@@ -22,10 +21,11 @@ exports.setupClub = (clubSocket, { userId, clubId }) => {
   clubSocket.emit("updateClubState", Session.getClub(clubId));
 };
 
-exports.updateSync = (data, clubSocket, { userId, clubId }) => {
-  const { currentPosition } = data;
-  Session.updateSeconds(currentPosition, userId, clubId);
-  clubSocket.emit("syncTrack", currentPosition);
+exports.updateSync = (currentPosition, clubSocket, { clubId }) => {
+  const newTime = Session.updateSeconds(currentPosition, clubId);
+  if (newTime) {
+    clubSocket.emit("syncTrack", currentPosition);
+  }
 };
 
 function removeByIndex(array, index) {
@@ -101,6 +101,9 @@ async function updatePlaylist(data, query, db = Club) {
   };
 }
 
+/* Move the played video in to the history if it does not already exist
+in the history. If the played video does exist move it to the front
+of the history queue and update the played at date */
 exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
   Session.resetSeconds(clubId);
   if (!videoId || videoId === "false") return;
@@ -137,3 +140,14 @@ exports.pageClose = (data, clubSocket, { userId, clubId }) => {
   console.log(data, userId);
   clubSocket.emit("memberLeft", updatedMembers);
 };
+
+/* 
+I want all the videos to sync with whichever video is the furthest ahead
+
+All users broad cast their play time to the server
+The server has a master play time property for each club
+Each time a user sends their current play time:
+  The longest becomes the new play time (user playtime > master playtime)
+  if (user playtime < master playtime but < 2 secs) do nothing
+  if (user playtime < master playtime but > 2 secs) sync that user to the master playtime
+*/

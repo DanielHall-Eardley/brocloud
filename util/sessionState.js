@@ -1,25 +1,25 @@
 const SessionState = class SessionState {
-  constructor () {
-    this.clubs = {}
+  constructor() {
+    this.clubs = {};
   }
 
   getClub(clubId) {
     if (!this.clubs[clubId]) {
       const club = {
         ellapsedSeconds: 0,
-        members: []
+        members: [],
       };
 
       this.clubs[clubId] = club;
-    };
+    }
 
     return this.clubs[clubId];
   }
 
   checkUserActive(checkMemberId, clubId) {
     return this.clubs[clubId].members.some(
-      memberId => memberId.toString() === checkMemberId.toString()
-    )
+      (memberId) => memberId.toString() === checkMemberId.toString()
+    );
   }
 
   checkMemberIsFirst(checkMemberId, clubId) {
@@ -28,24 +28,32 @@ const SessionState = class SessionState {
 
   addMember(memberId, clubId) {
     this.clubs[clubId].members.push(memberId);
-    return this.clubs[clubId].members
+    return this.clubs[clubId].members;
   }
 
   removeMember(checkMemberId, clubId) {
     const membersLeft = this.clubs[clubId].members.filter(
-      memberId => memberId.toString() !== checkMemberId.toString()
+      (memberId) => memberId.toString() !== checkMemberId.toString()
     );
-    
+
     this.clubs[clubId].members = membersLeft;
     return membersLeft;
   }
 
-  updateSeconds(seconds, userId, clubId) {
-    if (this.clubs[clubId].members[0].toString() === userId.toString()) {
-      this.clubs[clubId].ellapsedSeconds = seconds;
+  updateSeconds(currentPosition, clubId) {
+    let masterPlaytime = this.clubs[clubId].ellapsedSeconds;
+    const wholeNumber = Math.floor(currentPosition);
+    if (wholeNumber > masterPlaytime) {
+      this.clubs[clubId].ellapsedSeconds = wholeNumber;
+      return false;
     }
 
-    return this.clubs[clubId].ellapsedSeconds;
+    const difference = masterPlaytime - wholeNumber;
+    if (wholeNumber < masterPlaytime && difference > 2) {
+      return masterPlaytime;
+    }
+
+    return null;
   }
 
   resetSeconds(clubId) {
@@ -62,12 +70,12 @@ const initSession = (() => {
 
   return () => {
     if (!Session) {
-      Session = new SessionState()
-      return Session
+      Session = new SessionState();
+      return Session;
     }
 
-    return Session
-  }
+    return Session;
+  };
 })();
 
 module.exports = initSession;

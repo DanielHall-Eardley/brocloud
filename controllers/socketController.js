@@ -24,7 +24,12 @@ exports.startSync = async (videoId, clubSocket, { clubId }) => {
     playingVideo.videoId.toString() === videoId.toString() &&
     !playingVideo.playedAtTime
   ) {
-    const update = { $set: { playedAtTime: getTime(new Date()) } };
+    const update = {
+      $set: {
+        "upNext.$[element].playedAtTime": getTime(new Date()),
+      },
+      arrayFilters: [{ "element.videoId": videoId }],
+    };
     const updatedClub = await updateDocument(Club, filter, update);
     return clubSocket.emit("syncTrack", updatedClub.playedAtTime);
   }
@@ -48,6 +53,7 @@ function playlistState(current, history, videoId) {
 
   const playedVideoIndex = current.findIndex(checkVideoID);
   const video = current[playedVideoIndex];
+  video.playedAtTime = null;
 
   return {
     checkVideoInQueue() {

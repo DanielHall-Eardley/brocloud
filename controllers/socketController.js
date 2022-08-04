@@ -24,16 +24,14 @@ exports.startSync = async (videoId, clubSocket, { clubId }) => {
     playingVideo.videoId.toString() === videoId.toString() &&
     !playingVideo.playedAtTime
   ) {
+    playingVideo.playedAtTime = getTime(new Date());
     const update = {
       $set: {
-        "upNext.$[element].playedAtTime": getTime(new Date()),
+        ...playingVideo,
       },
     };
 
-    const options = {
-      arrayFilters: [{ "element.videoId": videoId }],
-    };
-    const updatedClub = await updateDocument(Club, filter, update, options);
+    const updatedClub = await updateDocument(Club, filter, update);
     return clubSocket.emit("syncTrack", updatedClub.playedAtTime);
   }
 

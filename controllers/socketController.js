@@ -24,7 +24,7 @@ exports.startSync = async (videoId, clubSocket, { clubId }) => {
     playingVideo.videoId.toString() === videoId.toString() &&
     !playingVideo.playedAtTime
   ) {
-    const update = { playedAtTime: getTime(new Date()) };
+    const update = { $set: { playedAtTime: getTime(new Date()) } };
     const updatedClub = await updateDocument(Club, filter, update);
     return clubSocket.emit("syncTrack", updatedClub.playedAtTime);
   }

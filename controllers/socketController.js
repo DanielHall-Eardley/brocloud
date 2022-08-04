@@ -1,12 +1,7 @@
-const {
-  updateDocument,
-  dbConnection,
-  findDocuments,
-} = require("../util/setupUtil");
+const { updateDocument, dbConnection } = require("../util/setupUtil");
 const { ObjectID } = require("mongodb");
 const Session = require("../util/sessionState")();
-const formatTimestamp = require("../util/formatTimeStamp");
-
+const { getTime } = require("date-fns");
 const Club = dbConnection().collection("club");
 
 exports.setupClub = (clubSocket, { userId, clubId }) => {
@@ -21,11 +16,20 @@ exports.setupClub = (clubSocket, { userId, clubId }) => {
   clubSocket.emit("updateClubState", Session.getClub(clubId));
 };
 
-exports.updateSync = (currentPosition, clubSocket, { clubId }) => {
-  const newTime = Session.updateSeconds(currentPosition, clubId);
-  if (newTime) {
-    clubSocket.emit("syncTrack", currentPosition);
+exports.startSync = async (videoId, clubSocket, { clubId }) => {
+  const filter = { _id: new ObjectID(clubId) };
+  const club = await Club.findOne(filter);
+  const playingVideo = club.upNext.shift();
+  if (
+    playingVideo.videoId.toString() === videoId.toString() &&
+    !playingVideo.playedAtTime
+  ) {
+    const update = { playedAtTime: getTime(new Date()) };
+    const updatedClub = await updateDocument(Club, filter, update);
+    return clubSocket.emit("syncTrack", updatedClub.playedAtTime);
   }
+
+  return clubSocket.emit("syncTrack", club.playedAtTime);
 };
 
 function removeByIndex(array, index) {
@@ -43,37 +47,18 @@ function playlistState(current, history, videoId) {
   }
 
   const playedVideoIndex = current.findIndex(checkVideoID);
-  const historyVideoIndex = history.findIndex(checkVideoID);
-  const video = {
-    ...current[playedVideoIndex],
-    playedAtTime: new Date(),
-  };
+  const video = current[playedVideoIndex];
 
   return {
-    checkIfDone() {
-      return historyVideoIndex > -1 && historyVideoIndex < 1;
-    },
-
-    checkVideoInHistory() {
-      return historyVideoIndex > -1;
-    },
-
-    checkCurrentVideoExists() {
-      return playedVideoIndex > -1;
+    checkVideoInQueue() {
+      return playedVideoIndex === 0;
     },
 
     addNewVideoToHistory() {
-      console.log("new");
       updatedPlaylist = removeByIndex(current, playedVideoIndex);
-      updatedHistory = [video, ...history];
-    },
-
-    updateVideoInHistory() {
-      console.log("exists");
       const filteredHistory = history.filter(
         (v) => v.videoId.toString() !== videoId.toString()
       );
-      updatedPlaylist = removeByIndex(current, playedVideoIndex);
       updatedHistory = [video, ...filteredHistory];
     },
 
@@ -101,33 +86,15 @@ async function updatePlaylist(data, query, db = Club) {
   };
 }
 
-/* Move the played video in to the history if it does not already exist
-in the history. If the played video does exist move it to the front
-of the history queue and update the played at date */
+/* Remove the played video from the queue, 
+remove the played video from the history
+if exists, add played video to start of history */
 exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
-  Session.resetSeconds(clubId);
-  if (!videoId || videoId === "false") return;
-
-  const query = {
-    _id: new ObjectID(clubId),
-  };
-
-  const result = await findDocuments(Club, query);
-  const { upNext, history } = result[0];
+  const { upNext, history } = await Club.findOne({ _id: new ObjectID(clubId) });
   const playlist = playlistState(upNext, history, videoId);
 
-  if (!playlist.checkCurrentVideoExists() && playlist.checkIfDone()) {
-    return clubSocket.emit("queueNext", playlist.data());
-  }
-
-  if (playlist.checkCurrentVideoExists() && !playlist.checkVideoInHistory()) {
+  if (playlist.checkVideoInQueue()) {
     playlist.addNewVideoToHistory();
-    const data = await updatePlaylist(playlist.data(), query);
-    return clubSocket.emit("queueNext", data);
-  }
-
-  if (playlist.checkCurrentVideoExists() && playlist.checkVideoInHistory()) {
-    playlist.updateVideoInHistory();
     const data = await updatePlaylist(playlist.data(), query);
     return clubSocket.emit("queueNext", data);
   }
@@ -140,14 +107,3 @@ exports.pageClose = (data, clubSocket, { userId, clubId }) => {
   console.log(data, userId);
   clubSocket.emit("memberLeft", updatedMembers);
 };
-
-/* 
-I want all the videos to sync with whichever video is the furthest ahead
-
-All users broad cast their play time to the server
-The server has a master play time property for each club
-Each time a user sends their current play time:
-  The longest becomes the new play time (user playtime > master playtime)
-  if (user playtime < master playtime but < 2 secs) do nothing
-  if (user playtime < master playtime but > 2 secs) sync that user to the master playtime
-*/

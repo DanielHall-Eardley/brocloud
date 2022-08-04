@@ -44,7 +44,6 @@ function onPlayerStateChange(event) {
   if (event.data === YT.PlayerState.ENDED) {
     console.log("Load next video");
     const currentVideoId = getVideoID();
-    stopSync();
     clubSocket.emit("queueNext", { videoId: currentVideoId });
   }
 
@@ -56,7 +55,6 @@ function onPlayerStateChange(event) {
 function onPlayerError(event) {
   clubSocket.emit("queueNext");
   updateError(`Error loading video. code ${event.data}`);
-  stopSync();
 }
 
 export { player };

@@ -97,7 +97,8 @@ async function updatePlaylist(data, query, db = Club) {
 remove the played video from the history
 if exists, add played video to start of history */
 exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
-  const { upNext, history } = await Club.findOne({ _id: new ObjectID(clubId) });
+  const query = { _id: new ObjectID(clubId) };
+  const { upNext, history } = await Club.findOne(query);
   const playlist = playlistState(upNext, history, videoId);
 
   if (playlist.checkVideoInQueue()) {

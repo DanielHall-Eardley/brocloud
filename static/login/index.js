@@ -3,24 +3,19 @@ import {
   updateLocalStorage,
   redirectToHome,
 } from "../common/global";
-import { joinClubListener } from "./joinClubListener";
-import { createClubListener } from "./createClubListener";
-import { submitSignup } from "./submitSignup";
-
 const formState = new FormState();
+import api from "../common/api.js";
 
 window.onload = () => {
   const form = document.getElementsByTagName("form")[0];
   formState.init(form);
   form.addEventListener("submit", formSubmit);
-  joinClubListener();
-  createClubListener();
 };
 
 async function formSubmit(event) {
   event.preventDefault();
   const body = formState.formData();
-  const { user } = await submitSignup(body);
+  const { user } = await api.login(body);
   updateLocalStorage(user);
   redirectToHome(user);
 }

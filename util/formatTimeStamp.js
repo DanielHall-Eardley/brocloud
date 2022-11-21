@@ -1,12 +1,12 @@
-const { format, differenceInDays, isValid } = require("date-fns");
+const { format, differenceInDays, parseISO } = require("date-fns");
 
 const formatTimestamp = (timestamp) => {
-  if (!isValid(timestamp)) {
+  if (!timestamp) {
     return "No date recorded";
   }
-
+  console.log(timestamp);
   const now = new Date();
-  const timeOfPost = new Date(timestamp);
+  const timeOfPost = parseISO(timestamp);
   const checkDay = differenceInDays(timeOfPost, now);
 
   if (checkDay === 0) {

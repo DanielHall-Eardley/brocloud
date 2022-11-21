@@ -1,6 +1,6 @@
 import { player } from "./youTube";
 import { createHTMLComponent } from "../../util/createHTMLComponent";
-import formatTimestamp from "../../util/formatTimeStamp";
+import addHistoryListeners from "./addHistoryListeners";
 
 function createQueueVideo(video) {
   const videoElement = [
@@ -94,7 +94,7 @@ function createHistoryVideo(video) {
                 {
                   name: "span",
                   attributes: { class: "main--timestamp" },
-                  content: video.playedAtTime,
+                  content: ` | ${video.playedAtTime}`,
                 },
               ],
             },
@@ -120,9 +120,7 @@ function queueNext(data) {
   if (videoToPlay) {
     player.loadVideoById(videoToPlay.videoId);
     upNext.forEach((video, index) => {
-      video.playedAtTime = formatTimestamp(video.playedAtTime);
-
-      if (index > -1 && index < 1) {
+      if (index === 0) {
         const htmlVideoElement = createHTMLComponent(createPlayingVideo(video));
         upNextContainer.append(htmlVideoElement);
       } else {
@@ -133,11 +131,11 @@ function queueNext(data) {
   }
 
   history.forEach((video) => {
-    video.playedAtTime = formatTimestamp(video.playedAtTime);
     const htmlVideoElement = createHTMLComponent(createHistoryVideo(video));
     historyContainer.append(htmlVideoElement);
-    //need to add button click listeners
   });
+
+  addHistoryListeners();
 }
 
 export default queueNext;

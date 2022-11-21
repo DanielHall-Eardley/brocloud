@@ -1,16 +1,17 @@
 const jwt = require("jsonwebtoken");
 const jwtSecret = require("crypto").randomBytes(256).toString("base64");
+const throwError = require("./throwError");
 
-function createJWT(userId, cb) {
-  // Create token with userId as payload
-  jwt.sign({ id: userId }, jwtSecret, { expiresIn: "7d" }, (err, token) => {
-    if (err) {
-      return throwError("Unable to generate token", 500);
-    }
-
-    // Execute the rest of the endpoint logic in the callback
-    cb(token);
-  });
+async function createJWT(userId) {
+  try {
+    const token = await jwt.sign({ id: userId }, jwtSecret, {
+      expiresIn: "7d",
+    });
+    return token;
+  } catch (error) {
+    throwError(error, 401);
+  }
 }
 
 exports.createJWT = createJWT;
+exports.secret = jwtSecret;

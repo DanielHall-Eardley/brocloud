@@ -29,17 +29,12 @@ const connect = async (initServer) => {
 const dbConnection = () => db;
 const mainIo = () => io;
 
-const findDocuments = (
-  db,
-  query = {},
-  options = {},
-  errorMsg = "Document(s) not found"
-) => {
+const findDocuments = (db, query = {}, options = {}) => {
   return new Promise(async (resolve, reject) => {
     const cursor = await db.find(query, options);
     const data = await cursor.toArray();
-    if (!data) {
-      reject(throwError(errorMsg, 404));
+    if (!data || data.length === 0) {
+      reject(null);
     }
 
     await cursor.close();
@@ -54,11 +49,12 @@ const addDocument = async (db, newDoc) => {
 
 const updateDocument = async (db, filter, update, options = {}) => {
   options.returnOriginal = false;
-  const newDoc = await db.updateOne(filter, update, options);
-  if (newDoc.ok !== 1) {
+  const updateRes = await db.updateOne(filter, update, options);
+  if (updateRes.result.ok !== 1) {
     throwError("Unable update your document", 500);
   }
-  return newDoc.value;
+  const updatedDoc = await findDocuments(db, filter);
+  return updatedDoc[0];
 };
 
 module.exports = {

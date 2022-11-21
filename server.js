@@ -2,12 +2,14 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const setupUtil = require("./util/setupUtil");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const initServer = () => {
   app.set("view-engine", "ejs");
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
 
   const staticUrl = path.join(__dirname, "dist");
   const assetUrl = path.join(__dirname, "assets");
@@ -22,14 +24,20 @@ const initServer = () => {
   const musicRoutes = require("./routes/musicRoutes");
   const signupLoginRoutes = require("./routes/signupLoginRoutes");
   const youtubeApiRoutes = require("./routes/youtubeApiRoutes");
+  const { authorizeAccess } = require("./util/auth");
 
-  app.use("/music", musicRoutes);
   app.use(signupLoginRoutes);
+  app.use(authorizeAccess);
+  app.use("/music", musicRoutes);
   app.use("/youtube-api", youtubeApiRoutes);
   app.use((error, req, res, next) => {
     console.log(error);
     const status = error.status || 500;
-    res.status(status).json({ error });
+    const err = {
+      message: error.message,
+      status: error.status,
+    };
+    res.status(status).json(err);
   });
 
   const port = process.env.PORT || 3000;
@@ -46,8 +54,6 @@ setupUtil.connect(initServer).catch((error) => {
 
 /*
   To do 
-  - update squad section when additional people sign up
   - get people youtube login information to retrieve their playlists
-  - create auth protection route
-  - Fix the date problem on front end rerender
+  - fix login and authorization
  */

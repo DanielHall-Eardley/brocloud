@@ -1,20 +1,27 @@
 import { player } from "./youTube";
 import { clubSocket } from "./socket";
 import getVideoID from "./getVideoID";
-import { getTime } from "date-fns";
+import { differenceInSeconds, parseISO } from "date-fns";
 
 function startSync() {
   const playingVideoId = getVideoID();
-  clubSocket.emit("startSync", playingVideoId);
+  const data = {
+    videoId: playingVideoId,
+    timestamp: new Date(),
+  };
+
+  if (playingVideoId) {
+    clubSocket.emit("startSync", data);
+  }
 }
-
-function updateTrackPosition(startPlay) {
+//figure this out
+function updateTrackPosition(trackStart) {
   const currentPosition = player.getCurrentTime();
-
-  // Use the start play timestamp to calculate a schronized time
-  const sync = getTime(new Date()) - startPlay;
+  const now = new Date();
+  const parsedTrackStart = parseISO(trackStart);
+  const sync = differenceInSeconds(now, parsedTrackStart);
   const timeDifference = sync - currentPosition;
-  console.log(timeDifference);
+  console.log({ sync, currentPosition });
   if (timeDifference > 2 || timeDifference < -2) {
     player.seekTo(sync, true);
   }

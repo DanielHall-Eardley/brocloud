@@ -1,34 +1,35 @@
-const { build } = require('esbuild');
-const watch = process.argv[2]
+const { build } = require("esbuild");
+const watch = process.argv[2];
 
 const config = {
   minify: true,
   sourcemap: true,
   bundle: true,
   entryPoints: [
-    './static/common/global.js',
-    './static/common/global.css',
-    './static/landing/index.js',
-    './static/landing/landing.css',
-    './static/main/index.js',
-    './static/main/main.css',
-    './static/signup/index.js',
-    './static/signup/signup.css',
-    './static/login/login.css',
+    "./static/common/global.js",
+    "./static/common/global.css",
+    "./static/landing/index.js",
+    "./static/landing/landing.css",
+    "./static/main/index.js",
+    "./static/main/main.css",
+    "./static/signup/index.js",
+    "./static/signup/signup.css",
+    "./static/login/login.css",
+    "./static/login/index.js",
   ],
-  entryNames: '[dir]/[name]',
-  outdir: 'dist'
+  entryNames: "[dir]/[name]",
+  outdir: "dist",
 };
 
-const refreshBuild = onceOrWatch => {
-  if (onceOrWatch === 'watch') {
+const refreshBuild = (onceOrWatch) => {
+  if (onceOrWatch === "watch") {
     setInterval(() => {
-      build(config)
-      console.log('refreshing')
+      build(config);
+      console.log("refreshing");
     }, 10000);
   } else {
-    build(config)
+    build(config);
   }
-}
+};
 
-refreshBuild(watch)
+refreshBuild(watch);

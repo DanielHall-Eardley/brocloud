@@ -2,8 +2,8 @@ const catchError = require("../util/catchError");
 const throwError = require("../util/throwError");
 const sanitizeHtml = require("sanitize-html");
 const { initClubSocket, clubNs } = require("../util/socketUtil");
-const formatTimestamp = require("../util/formatTimeStamp");
 const youtubeApiKey = process.env.YOUTUBE_API_KEY;
+const formatHistory = require("../util/formatHistory");
 
 const {
   updateDocument,
@@ -24,7 +24,7 @@ const extractIds = (req) => {
   };
 };
 
-exports.getMusic = catchError(async (req, res, next) => {
+exports.getClub = catchError(async (req, res, next) => {
   const { clubId, userId } = req.params;
 
   const user = await User.findOne({ _id: new ObjectID(userId) });
@@ -41,13 +41,7 @@ exports.getMusic = catchError(async (req, res, next) => {
     throwError("No club found", 404);
   }
 
-  const formattedHistory = club.history.map((video) => {
-    const timestamp = formatTimestamp(video.playedAtTime);
-    return {
-      ...video,
-      playedAtTime: timestamp,
-    };
-  });
+  const formattedHistory = formatHistory(club.history);
 
   const data = {
     members,

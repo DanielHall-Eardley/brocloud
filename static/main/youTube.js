@@ -1,6 +1,6 @@
 import initSocketListeners from "./initSocketListeners";
 import { updateError } from "../common/global.js";
-import { startSync, stopSync } from "./sync";
+import { startSync } from "./sync";
 import getUser from "./getUser";
 import { clubSocket } from "./socket";
 import getVideoID from "./getVideoID";

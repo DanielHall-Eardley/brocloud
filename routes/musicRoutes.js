@@ -1,7 +1,7 @@
-const router = require('express').Router()
-const controller = require('../controllers/musicController');
+const router = require("express").Router();
+const controller = require("../controllers/musicController");
 
-router.get('/:clubId/:userId', controller.getMusic);
-router.post('/addVideo', controller.addVideo);
+router.get("/:clubId/:userId", controller.getClub);
+router.post("/addVideo", controller.addVideo);
 
-module.exports = router
+module.exports = router;

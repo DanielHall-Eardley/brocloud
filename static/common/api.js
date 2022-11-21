@@ -48,4 +48,8 @@ export default {
     const data = await request("/music/addVideo", body);
     return Promise.resolve(data);
   },
+  login: async (body) => {
+    const data = await request("/login", body);
+    return Promise.resolve(data);
+  },
 };

@@ -1,5 +1,5 @@
-// export const host = "http://localhost:3000";
-export const host = "https://bro-cloud.herokuapp.com";
+export const host = "http://localhost:3000";
+// export const host = "https://bro-cloud.herokuapp.com";
 
 export const FormState = class FormState {
   constructor(customFn = null) {
@@ -41,4 +41,13 @@ export const updateError = (error) => {
   setTimeout(() => {
     errorNotif.innerText = "";
   }, 20000);
+};
+
+export const updateLocalStorage = (user) => {
+  localStorage.setItem("user", JSON.stringify(user));
+  localStorage.setItem("userSignedUp", true);
+};
+
+export const redirectToHome = (user) => {
+  window.location.replace(`${host}/music/${user.clubId}/${user._id}`);
 };

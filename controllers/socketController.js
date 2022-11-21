@@ -1,8 +1,8 @@
 const { updateDocument, dbConnection } = require("../util/setupUtil");
 const { ObjectID } = require("mongodb");
 const Session = require("../util/sessionState")();
-const { getTime } = require("date-fns");
 const Club = dbConnection().collection("club");
+const formatHistory = require("../util/formatHistory");
 
 exports.setupClub = (clubSocket, { userId, clubId }) => {
   const club = Session.getClub(clubId);
@@ -16,73 +16,57 @@ exports.setupClub = (clubSocket, { userId, clubId }) => {
   clubSocket.emit("updateClubState", Session.getClub(clubId));
 };
 
-exports.startSync = async (videoId, clubSocket, { clubId }) => {
+exports.startSync = async ({ videoId, timestamp }, clubSocket, { clubId }) => {
   const filter = { _id: new ObjectID(clubId) };
   const club = await Club.findOne(filter);
   const playingVideo = club.upNext.shift();
+
+  if (!playingVideo) return;
+
   if (
     playingVideo.videoId.toString() === videoId.toString() &&
     !playingVideo.playedAtTime
   ) {
-    playingVideo.playedAtTime = getTime(new Date());
+    const query = {
+      ...filter,
+      "upNext.videoId": videoId,
+    };
     const update = {
       $set: {
-        ...playingVideo,
+        "upNext.$.playedAtTime": timestamp,
       },
     };
 
-    const updatedClub = await updateDocument(Club, filter, update);
-    return clubSocket.emit("syncTrack", updatedClub.playedAtTime);
+    await updateDocument(Club, query, update);
+    return clubSocket.emit("syncTrack", timestamp);
   }
 
-  return clubSocket.emit("syncTrack", club.playedAtTime);
+  return clubSocket.emit("syncTrack", playingVideo.playedAtTime);
 };
 
-function removeByIndex(array, index) {
-  const startPortion = array.slice(0, index);
-  const endPortion = array.slice(index + 1);
-  return [...startPortion, ...endPortion];
-}
+function findVideo(current, videoId) {
+  const video = current[0];
 
-function playlistState(current, history, videoId) {
-  let updatedPlaylist = current;
-  let updatedHistory = history;
-
-  function checkVideoID(video) {
-    return video.videoId.toString() === videoId.toString();
+  if (video.videoId.toString() === videoId.toString()) {
+    return video;
   }
-
-  const playedVideoIndex = current.findIndex(checkVideoID);
-  const video = current[playedVideoIndex];
-  video.playedAtTime = null;
-
-  return {
-    checkVideoInQueue() {
-      return playedVideoIndex === 0;
-    },
-
-    addNewVideoToHistory() {
-      updatedPlaylist = removeByIndex(current, playedVideoIndex);
-      const filteredHistory = history.filter(
-        (v) => v.videoId.toString() !== videoId.toString()
-      );
-      updatedHistory = [video, ...filteredHistory];
-    },
-
-    data() {
-      return {
-        upNext: updatedPlaylist,
-        history: updatedHistory,
-      };
-    },
-  };
+  return false;
 }
 
-async function updatePlaylist(data, query, db = Club) {
+function addVideoToHistory(history, video) {
+  const filteredHistory = history.filter(
+    (v) => v.videoId.toString() !== video.videoId.toString()
+  );
+  return [video, ...filteredHistory];
+}
+
+async function updatePlaylist(history, query, db = Club) {
   const update = {
+    $pop: {
+      upNext: -1,
+    },
     $set: {
-      upNext: data.upNext,
-      history: data.history,
+      history,
     },
   };
 
@@ -98,16 +82,19 @@ remove the played video from the history
 if exists, add played video to start of history */
 exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
   const query = { _id: new ObjectID(clubId) };
-  const { upNext, history } = await Club.findOne(query);
-  const playlist = playlistState(upNext, history, videoId);
+  const club = await Club.findOne(query);
+  const video = findVideo(club.upNext, videoId);
 
-  if (playlist.checkVideoInQueue()) {
-    playlist.addNewVideoToHistory();
-    const data = await updatePlaylist(playlist.data(), query);
-    return clubSocket.emit("queueNext", data);
+  if (video) {
+    const updatedHistory = addVideoToHistory(club.history, video);
+    const result = await updatePlaylist(updatedHistory, query);
+    const formattedHistory = formatHistory(result.history);
+
+    clubSocket.emit("queueNext", {
+      upNext: result.upNext,
+      history: formattedHistory,
+    });
   }
-
-  clubSocket.emit("queueNext", { upNext, history });
 };
 
 exports.pageClose = (data, clubSocket, { userId, clubId }) => {

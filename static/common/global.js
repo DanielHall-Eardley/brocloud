@@ -35,6 +35,8 @@ export const FormState = class FormState {
 
 export const updateError = (error) => {
   const errorNotif = document.querySelector(".error");
+  // identify the shape of the error object to extract
+  // the message and status code
   const errorMessage = document.createTextNode(error);
   errorNotif.appendChild(errorMessage);
 

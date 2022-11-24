@@ -23,12 +23,12 @@ const request = async (url, body, method) => {
   }
 
   const res = await fetch(host + url, options);
+  const data = await res.json();
   if (res.status >= 200 && res.status <= 299) {
-    const data = await res.json();
     return Promise.resolve(data);
   }
-
-  updateError(res.error);
+  console.log(data);
+  updateError(data.error);
 };
 
 export default {

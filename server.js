@@ -33,7 +33,7 @@ const initServer = () => {
   app.use((error, req, res, next) => {
     console.log(error);
     const status = error.status || 500;
-    const error = {
+    const err = {
       message: error.message,
       status: error.status,
     };

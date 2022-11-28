@@ -8,7 +8,7 @@ exports.authorizeAccess = catchError(async (req, res, next) => {
     jwt.verify(token, secret);
   } catch (error) {
     // res.redirect("/login");
-    /*  */
+    /* Test */
   }
 
   next();

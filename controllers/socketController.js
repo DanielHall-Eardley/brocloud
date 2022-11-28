@@ -60,13 +60,17 @@ function addVideoToHistory(history, video) {
   return [video, ...filteredHistory];
 }
 
-async function updatePlaylist(history, query, db = Club) {
+function removeVideoFromUpNext(current, videoId) {
+  return current.filter(
+    (video) => video.videoId.toString() !== videoId.toString()
+  );
+}
+
+async function updatePlaylist(upNext, history, query, db = Club) {
   const update = {
-    $pop: {
-      upNext: -1,
-    },
     $set: {
       history,
+      upNext,
     },
   };
 
@@ -87,7 +91,8 @@ exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
 
   if (video) {
     const updatedHistory = addVideoToHistory(club.history, video);
-    const result = await updatePlaylist(updatedHistory, query);
+    const updatedCurrent = removeVideoFromUpNext(club.upNext, videoId);
+    const result = await updatePlaylist(updatedCurrent, updatedHistory, query);
     const formattedHistory = formatHistory(result.history);
 
     clubSocket.emit("queueNext", {

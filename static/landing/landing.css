@@ -11,4 +11,12 @@
 .landing--subtitle {
   color: var(--dark-green);
   font-size: 3rem;
+  display: flex;
+  justify-content: center;
+}
+
+.signup-link,
+.login-link {
+  margin-right: 4rem;
+  font-size: 2rem;
 }

@@ -47,7 +47,6 @@ export const updateError = (error) => {
 
 export const updateLocalStorage = (user) => {
   localStorage.setItem("user", JSON.stringify(user));
-  localStorage.setItem("userSignedUp", true);
 };
 
 export const redirectToHome = (user) => {

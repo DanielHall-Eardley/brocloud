@@ -1,2 +1,2 @@
-(()=>{var t="https://bro-cloud.herokuapp.com";var r=e=>{window.location.replace(`${t}/music/${e.clubId}/${e._id}`)};window.onload=n;function n(){let e=JSON.parse(localStorage.getItem("userSignedUp"));if(!e||e==="null")return window.location.replace(`${t}/signup`);let o=JSON.parse(localStorage.getItem("user"));if(!o||o==="null")return window.location.replace(`${t}/login`);r(o)}})();
+(()=>{var o="https://bro-cloud.herokuapp.com";var e=t=>{window.location.replace(`${o}/music/${t.clubId}/${t._id}`)};window.onload=r;function r(){let t=JSON.parse(localStorage.getItem("user"));t&&e(t)}})();
 //# sourceMappingURL=index.js.map

@@ -151,6 +151,7 @@ img {
   width: clamp(30rem, 50rem, 70rem);
   padding: 2rem;
   border-radius: 10px;
+  margin-bottom: 3rem;
 }
 
 :is(.entry-form) label,
@@ -163,9 +164,10 @@ select {
 }
 
 .entry-link {
-  width: 100%;
+  font-size: 2rem;
+}
+
+.link-nav {
   display: flex;
-  justify-content: flex-end;
-  font-size: 1.6rem;
-  padding-top: 2rem;
+  justify-content: center;
 }

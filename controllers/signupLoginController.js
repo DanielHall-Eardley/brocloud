@@ -4,12 +4,7 @@ const setToken = require("../util/setToken");
 const bcrypt = require("bcrypt");
 const { createJWT } = require("../util/createJWT");
 const host = process.env.HOST;
-const youtubeApiKey = process.env.YOUTUBE_API_KEY;
-const formatHistory = require("../util/formatHistory");
-const initSession = require("../util/sessionState");
-const { initClubSocket } = require("../util/socketUtil");
 
-const Session = initSession();
 const {
   addDocument,
   findDocuments,

@@ -56,6 +56,5 @@ setupUtil.connect(initServer).catch((error) => {
 /*
   To do 
   - get people youtube login information to retrieve their playlists
-  - fix login and authorization
   - fix error display in front end
  */

@@ -27,7 +27,7 @@ const request = async (url, body, method) => {
   if (res.status >= 200 && res.status <= 299) {
     return Promise.resolve(data);
   }
-  console.log(data);
+
   updateError(data.error);
 };
 

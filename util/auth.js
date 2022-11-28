@@ -7,10 +7,7 @@ exports.authorizeAccess = catchError(async (req, res, next) => {
   try {
     jwt.verify(token, secret);
   } catch (error) {
-    const errorType = error.name;
-    if (errorType === "TokenExpiredError") {
-      res.redirect("/login");
-    }
+    res.redirect("/login");
   }
 
   next();

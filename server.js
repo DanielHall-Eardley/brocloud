@@ -5,11 +5,6 @@ const setupUtil = require("./util/setupUtil");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
-const musicRoutes = require("./routes/musicRoutes");
-const signupLoginRoutes = require("./routes/signupLoginRoutes");
-const youtubeApiRoutes = require("./routes/youtubeApiRoutes");
-const { authorizeAccess } = require("./util/auth");
-
 const initServer = () => {
   app.set("view-engine", "ejs");
   app.use(express.json());
@@ -25,6 +20,11 @@ const initServer = () => {
     const filePath = path.join(__dirname, "static", "landing", "index.html");
     res.sendFile(filePath);
   });
+
+  const musicRoutes = require("./routes/musicRoutes");
+  const signupLoginRoutes = require("./routes/signupLoginRoutes");
+  const youtubeApiRoutes = require("./routes/youtubeApiRoutes");
+  const { authorizeAccess } = require("./util/auth");
 
   app.use(signupLoginRoutes);
   app.use(authorizeAccess);

@@ -18,6 +18,7 @@ const Club = dbConnection().collection("club");
 
 exports.getSignup = catchError(async (req, res, next) => {
   const clubs = await findDocuments(Club);
+  console.log(clubs);
   const data = {
     clubs,
     host,

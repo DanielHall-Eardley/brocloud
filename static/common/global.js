@@ -1,5 +1,5 @@
-export const host = "http://localhost:3000";
-// export const host = "https://dry-coast-81738.herokuapp.com/";
+// export const host = "http://localhost:3000";
+export const host = "https://dry-coast-81738.herokuapp.com/";
 
 export const FormState = class FormState {
   constructor(customFn = null) {

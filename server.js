@@ -22,11 +22,13 @@ const initServer = () => {
   });
 
   const musicRoutes = require("./routes/musicRoutes");
-  const signupLoginRoutes = require("./routes/signupLoginRoutes");
+  const loginRoutes = require("./routes/loginRoutes");
+  const signupRoutes = require("./routes/signupRoutes");
   const youtubeApiRoutes = require("./routes/youtubeApiRoutes");
   const { authorizeAccess } = require("./util/auth");
 
-  app.use(signupLoginRoutes);
+  app.use("/signup", signupRoutes);
+  app.use(loginRoutes);
   app.use(authorizeAccess);
   app.use("/music", musicRoutes);
   app.use("/youtube-api", youtubeApiRoutes);

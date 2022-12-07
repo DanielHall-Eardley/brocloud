@@ -25,7 +25,8 @@
         <label for="password"> Enter a password</label>
         <input id="password" type="password" name="password" />
 
-        <label for="clubs">Select a club to join</label>
+        <% if (clubs.length > 0) { %>
+        <label for="clubs">Select a club to join: </label>
         <ul id="clubs" class="signup-join--club">
           <% clubs.forEach((club) => { %>
           <li>
@@ -34,7 +35,8 @@
           <% }); %>
         </ul>
         <h3>OR</h3>
-        <label for="clubName">Enter name of club to be created</label>
+        <% } %>
+        <label for="clubName">Enter name of club to be created: </label>
         <input type="text" class="signup-create--club" name="clubName" />
         <div class="signup--btn-container">
           <button id="signup-submit--btn" class="btn--primary">

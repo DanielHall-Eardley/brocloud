@@ -1,6 +1,5 @@
 const { MongoClient } = require("mongodb");
-const uri =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/brocloud?poolSize=20";
+const uri = process.env.MONGODB_URI;
 const throwError = require("../util/throwError");
 const socket = require("socket.io");
 

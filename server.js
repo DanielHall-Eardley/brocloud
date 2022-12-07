@@ -43,8 +43,7 @@ const initServer = () => {
     res.status(status).json(err);
   });
 
-  const port = process.env.PORT || 3000;
-  const server = app.listen(port, () => {
+  const server = app.listen("http://localhost:3000", () => {
     console.log("connected at " + port);
   });
 

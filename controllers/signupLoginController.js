@@ -3,7 +3,6 @@ const throwError = require("../util/throwError");
 const setToken = require("../util/setToken");
 const bcrypt = require("bcrypt");
 const { createJWT } = require("../util/createJWT");
-const host = process.env.HOST;
 
 const {
   addDocument,
@@ -21,18 +20,13 @@ exports.getSignup = catchError(async (req, res, next) => {
   console.log(clubs);
   const data = {
     clubs,
-    host,
   };
 
   res.render("./signup/index.ejs", data);
 });
 
 exports.getLogin = catchError(async (req, res, next) => {
-  const data = {
-    host,
-  };
-
-  res.render("./login/index.ejs", data);
+  res.render("./login/index.ejs");
 });
 
 exports.login = catchError(async (req, res, next) => {

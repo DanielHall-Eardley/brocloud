@@ -33,10 +33,6 @@ const findDocuments = (db, query = {}, options = {}) => {
   return new Promise(async (resolve, reject) => {
     const cursor = await db.find(query, options);
     const data = await cursor.toArray();
-    if (!data || data.length === 0) {
-      reject(null);
-    }
-
     await cursor.close();
     resolve(data);
   });

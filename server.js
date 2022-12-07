@@ -3,7 +3,8 @@ const app = express();
 const path = require("path");
 const setupUtil = require("./util/setupUtil");
 const cookieParser = require("cookie-parser");
-require("dotenv").config();
+const result = require("dotenv").config();
+console.log("Env vars", result);
 
 const initServer = () => {
   app.set("view-engine", "ejs");

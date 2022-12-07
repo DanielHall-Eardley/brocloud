@@ -5,8 +5,6 @@ const setupUtil = require("./util/setupUtil");
 const cookieParser = require("cookie-parser");
 
 const initServer = () => {
-  const result = require("dotenv").config();
-  console.log("Env vars", result);
   app.set("view-engine", "ejs");
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

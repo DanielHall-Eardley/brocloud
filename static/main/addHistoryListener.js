@@ -1,24 +1,14 @@
-import api from "../common/api";
+import submitAddVideo from "./submitAddVideo";
 
-function addHistoryListener(wrapper, ul) {
-  const videoId = wrapper.querySelector(".played-video").value;
-  const button = wrapper.getElementsByTagName("button")[0];
-  const name = button.querySelector(".played-video--name").innerText;
+function addHistoryListener(wrapper) {
+  const video = wrapper.querySelector(".played-video");
 
-  button.addEventListener("click", async (event) => {
-    /* if video is from search results, 
-    clear search results */
-    if (ul) {
-      ul.innerText = "";
-    }
-
-    const body = {
-      name,
-      videoId,
-    };
-
-    await api.addVideo(body);
-  });
+  if (video) {
+    const videoId = video.value;
+    const button = wrapper.getElementsByTagName("button")[0];
+    const name = button.querySelector(".played-video--name").innerText;
+    submitAddVideo(button, name, videoId);
+  }
 }
 
 export default addHistoryListener;

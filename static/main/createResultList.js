@@ -1,4 +1,4 @@
-import addHistoryListener from "./addHistoryListener";
+import submitAddVideo from "./submitAddVideo";
 
 function createResultList(data) {
   const list = new DocumentFragment();
@@ -9,7 +9,6 @@ function createResultList(data) {
     const li = document.createElement("li");
     const button = document.createElement("button");
     button.className = "btn--result";
-    addHistoryListener(button, ul, item.snippet.title, item.id.videoId);
 
     const span = document.createElement("span");
     const title = document.createTextNode(item.snippet.title);
@@ -23,6 +22,7 @@ function createResultList(data) {
     button.appendChild(img);
     li.appendChild(button);
     ul.appendChild(li);
+    submitAddVideo(button, item.snippet.title, item.id.videoId);
   });
 
   list.append(ul);

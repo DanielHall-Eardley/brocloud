@@ -28,7 +28,7 @@ const request = async (url, body, method) => {
     return Promise.resolve(data);
   }
 
-  updateError(data.error);
+  updateError(data);
 };
 
 export default {

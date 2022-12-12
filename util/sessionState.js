@@ -15,14 +15,11 @@ const SessionState = class SessionState {
     return this.clubs[clubId];
   }
 
-  checkUserActive(checkMemberId, clubId) {
-    return this.clubs[clubId].members.some(
-      (memberId) => memberId.toString() === checkMemberId.toString()
-    );
-  }
-
   addMember(memberId, clubId) {
-    this.clubs[clubId].members.push(memberId);
+    const checkMember = this.clubs[clubId].members.includes(memberId);
+    if (!checkMember) {
+      this.clubs[clubId].members.push(memberId);
+    }
     return this.clubs[clubId].members;
   }
 

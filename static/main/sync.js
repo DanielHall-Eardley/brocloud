@@ -22,7 +22,7 @@ function updateTrackPosition(trackStart) {
   const sync = differenceInSeconds(now, parsedTrackStart);
   const timeDifference = sync - currentPosition;
   console.log({ sync, currentPosition });
-  if (timeDifference > 2 || timeDifference < -2) {
+  if (timeDifference > 1 || timeDifference < -1) {
     player.seekTo(sync, true);
   }
 }

@@ -5,13 +5,6 @@ const Club = dbConnection().collection("club");
 const formatHistory = require("../util/formatHistory");
 
 exports.setupClub = (clubSocket, { userId, clubId }) => {
-  const club = Session.getClub(clubId);
-  const userActive = Session.checkUserActive(userId, clubId);
-
-  if (userActive) {
-    return clubSocket.emit("updateClubState", club);
-  }
-
   Session.addMember(userId, clubId);
   clubSocket.emit("updateClubState", Session.getClub(clubId));
 };
@@ -104,6 +97,5 @@ exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
 
 exports.pageClose = (data, clubSocket, { userId, clubId }) => {
   const updatedMembers = Session.removeMember(userId, clubId);
-  console.log(data, userId);
   clubSocket.emit("memberLeft", updatedMembers);
 };

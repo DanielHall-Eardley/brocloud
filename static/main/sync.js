@@ -14,7 +14,7 @@ function startSync() {
     clubSocket.emit("startSync", data);
   }
 }
-//figure this out
+
 function updateTrackPosition(trackStart) {
   const currentPosition = player.getCurrentTime();
   const now = new Date();
@@ -22,7 +22,7 @@ function updateTrackPosition(trackStart) {
   const ellapsedTime = differenceInSeconds(now, parsedTrackStart);
   const timeDifference = ellapsedTime - currentPosition;
   console.log({ ellapsedTime, currentPosition });
-  if (timeDifference > 0.4 || timeDifference < 0.4) {
+  if (timeDifference > 1 || timeDifference < 1) {
     player.seekTo(ellapsedTime, true);
   }
 }

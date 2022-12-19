@@ -1,10 +1,8 @@
 import initSocketListeners from "./initSocketListeners";
 import { updateError } from "../common/global.js";
-import { startSync } from "./sync";
-import getUser from "./getUser";
+import { startSync, syncVideo } from "./sync";
 import { clubSocket } from "./socket";
 import getVideoID from "./getVideoID";
-const user = getUser();
 
 let player;
 
@@ -34,10 +32,23 @@ function onYouTubeIframeAPIReady() {
   player = new YT.Player("player", options);
 }
 
+function setPlayStart() {
+  const videoId = getVideoID();
+  if (videoId) {
+    const videoStartTime = document.getElementById("video-timestamp");
+    if (videoStartTime && videoStartTime.value) {
+      syncVideo(videoStartTime.value);
+    } else {
+      startSync(videoId);
+    }
+  }
+}
+
 function onPlayerReady(event) {
   event.target.setVolume(100);
   console.log("Initialized youtube player");
   initSocketListeners();
+  setPlayStart();
 }
 
 function onPlayerStateChange(event) {
@@ -47,8 +58,8 @@ function onPlayerStateChange(event) {
     clubSocket.emit("queueNext", { videoId: currentVideoId });
   }
 
-  if (event.data === YT.PlayerState.PLAYING) {
-    startSync();
+  if (event.data === YT.PlayerState.CUED) {
+    setPlayStart();
   }
 }
 

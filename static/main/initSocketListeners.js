@@ -10,7 +10,6 @@ function initSocketListeners() {
   clubSocket.on("queueNext", queueNext);
   clubSocket.on("memberLeft", deactivateMember);
   clubSocket.on("addToPlaylist", addToPlaylist);
-  clubSocket.on("syncTrack", updateTrackPosition);
   console.log("Initialized socket listeners");
 }
 

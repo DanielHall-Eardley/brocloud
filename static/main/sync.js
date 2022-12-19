@@ -1,30 +1,23 @@
-import { player } from "./youTube";
 import { clubSocket } from "./socket";
-import getVideoID from "./getVideoID";
+import { player } from "./youTube";
 import { differenceInSeconds, parseISO } from "date-fns";
 
-function startSync() {
-  const playingVideoId = getVideoID();
+function startSync(videoId) {
   const data = {
-    videoId: playingVideoId,
+    videoId: videoId,
     timestamp: new Date(),
   };
 
-  if (playingVideoId) {
+  if (videoId) {
     clubSocket.emit("startSync", data);
   }
 }
 
-function updateTrackPosition(trackStart) {
-  const currentPosition = player.getCurrentTime();
+function syncVideo(trackStart) {
   const now = new Date();
   const parsedTrackStart = parseISO(trackStart);
   const ellapsedTime = differenceInSeconds(now, parsedTrackStart);
-  const timeDifference = ellapsedTime - currentPosition;
-  console.log({ ellapsedTime, currentPosition });
-  if (timeDifference > 1 || timeDifference < 1) {
-    player.seekTo(ellapsedTime, true);
-  }
+  player.seekTo(ellapsedTime, true);
 }
 
-export { updateTrackPosition, startSync };
+export { syncVideo, startSync };

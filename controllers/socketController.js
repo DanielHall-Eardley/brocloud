@@ -26,10 +26,7 @@ exports.startSync = async ({ videoId, timestamp }, clubSocket, { clubId }) => {
     };
 
     await updateDocument(Club, query, update);
-    return clubSocket.emit("syncTrack", timestamp);
   }
-
-  return clubSocket.emit("syncTrack", playingVideo.playedAtTime);
 };
 
 function findVideo(current, videoId) {

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const jwtSecret = require("crypto").randomBytes(256).toString("base64");
+// const jwtSecret = "secret";
 const throwError = require("./throwError");
 
 async function createJWT(userId) {

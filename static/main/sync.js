@@ -21,9 +21,9 @@ function updateTrackPosition(trackStart) {
   const parsedTrackStart = parseISO(trackStart);
   const ellapsedTime = differenceInSeconds(now, parsedTrackStart);
   const timeDifference = ellapsedTime - currentPosition;
-  console.log({ sync, currentPosition });
+  console.log({ ellapsedTime, currentPosition });
   if (timeDifference > 0.4 || timeDifference < 0.4) {
-    player.seekTo(sync, true);
+    player.seekTo(ellapsedTime, true);
   }
 }
 

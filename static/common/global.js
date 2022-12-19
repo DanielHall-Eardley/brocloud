@@ -52,3 +52,7 @@ export const updateLocalStorage = (user) => {
 export const redirectToHome = (user) => {
   window.location.replace(`${host}/music/${user.clubId}/${user._id}`);
 };
+
+export const redirectToLogin = () => {
+  window.location.replace(`${host}/login`);
+};

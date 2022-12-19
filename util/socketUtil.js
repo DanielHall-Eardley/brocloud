@@ -1,8 +1,9 @@
 const { mainIo } = require("./setupUtil");
 const socketController = require("../controllers/socketController");
 
-let clubSocket;
-const initClubSocket = (clubId) => {
+let clubSocket = null;
+function initClubSocket(clubId) {
+  if (clubSocket) return clubSocket;
   clubSocket = mainIo().of(`/${clubId}`);
 
   clubSocket.on("connection", (socket) => {
@@ -14,16 +15,12 @@ const initClubSocket = (clubId) => {
       }
     };
 
-    socket.on("setupClub", forwardClubSocket(socketController.setupClub));
     socket.on("startSync", forwardClubSocket(socketController.startSync));
     socket.on("queueNext", forwardClubSocket(socketController.queueNext));
     socket.on("disconnect", forwardClubSocket(socketController.pageClose));
   });
-};
 
-const clubNs = () => clubSocket;
+  return clubSocket;
+}
 
-module.exports = {
-  initClubSocket,
-  clubNs,
-};
+module.exports = initClubSocket;

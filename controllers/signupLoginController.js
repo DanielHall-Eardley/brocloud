@@ -3,6 +3,9 @@ const throwError = require("../util/throwError");
 const setToken = require("../util/setToken");
 const bcrypt = require("bcrypt");
 const { createJWT } = require("../util/createJWT");
+const initClubSocket = require("../util/socketUtil");
+const updateActiveUser = require("../util/updateActiveUser");
+const sanitizeUser = require("../util/sanitizeUser");
 
 const {
   addDocument,
@@ -58,21 +61,12 @@ exports.login = catchError(async (req, res, next) => {
 
   const token = await createJWT(user._id);
   setToken(token, res);
-  const sanitizedUser = sanitizeUser(user);
+  const updatedUser = await updateActiveUser(user._id, true);
+  const sanitizedUser = sanitizeUser(updatedUser);
+  const clubSocket = initClubSocket(club._id);
+  clubSocket.emit("updateActiveMember", sanitizedUser);
   res.status(200).json({ user: sanitizedUser });
 });
-
-function sanitizeUser(user) {
-  const sanitizedUser = {
-    firstName: user.firstName,
-    lastName: user.lastName,
-    nickName: user.nickName,
-    clubId: user.clubId,
-    _id: user._id,
-  };
-
-  return sanitizedUser;
-}
 
 async function createUser(body, clubId) {
   const { firstName, lastName, nickName, password } = body;
@@ -84,6 +78,7 @@ async function createUser(body, clubId) {
     nickName,
     clubId: new ObjectID(clubId),
     password: hashedPassword,
+    active: true,
   };
   const savedUser = await addDocument(User, userDoc);
   return sanitizeUser(savedUser);
@@ -99,6 +94,8 @@ exports.joinClub = catchError(async (req, res, next) => {
   const user = await createUser(req.body, existingClub._id);
   const token = await createJWT(user._id);
   setToken(token, res);
+  const clubSocket = initClubSocket(clubId);
+  clubSocket.emit("updateActiveMember", user);
   res.status(200).json({ user });
 });
 
@@ -111,6 +108,7 @@ async function createClub(clubName) {
     name: clubName,
     history: [],
     upNext: [],
+    activeUsers: [],
   };
   const club = await addDocument(Club, clubDoc);
   return club;
@@ -128,5 +126,8 @@ exports.createClub = catchError(async (req, res, next) => {
 
   const token = await createJWT(user._id);
   setToken(token, res);
+  const sanitizedUser = sanitizeUser(user);
+  const clubSocket = initClubSocket(club._id);
+  clubSocket.emit("updateActiveMember", sanitizedUser);
   res.status(200).json({ user });
 });

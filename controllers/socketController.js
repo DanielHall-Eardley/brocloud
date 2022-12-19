@@ -1,13 +1,8 @@
 const { updateDocument, dbConnection } = require("../util/setupUtil");
 const { ObjectID } = require("mongodb");
-const Session = require("../util/sessionState")();
 const Club = dbConnection().collection("club");
 const formatHistory = require("../util/formatHistory");
-
-exports.setupClub = (clubSocket, { userId, clubId }) => {
-  Session.addMember(userId, clubId);
-  clubSocket.emit("updateClubState", Session.getClub(clubId));
-};
+const updateActiveUser = require("../util/updateActiveUser");
 
 exports.startSync = async ({ videoId, timestamp }, clubSocket, { clubId }) => {
   const filter = { _id: new ObjectID(clubId) };
@@ -95,7 +90,7 @@ exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
   }
 };
 
-exports.pageClose = (data, clubSocket, { userId, clubId }) => {
-  const updatedMembers = Session.removeMember(userId, clubId);
-  clubSocket.emit("memberLeft", updatedMembers);
+exports.pageClose = async (data, clubSocket, { userId, clubId }) => {
+  await updateActiveUser(userId, false);
+  clubSocket.emit("memberLeft", userId);
 };

@@ -30,7 +30,11 @@
             <q> <%= member.nickName %></q>
             <%= member.lastName %>
           </span>
+          <% if (member.active) { %>
+          <span class="u--green-circle"></span>
+          <% } else { %>
           <span class="u--red-circle"></span>
+          <% } %>
         </li>
         <% }); %>
       </ul>

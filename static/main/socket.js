@@ -1,20 +1,26 @@
-import initYouTube from './youTube'
-import getUser from './getUser';
+import initYouTube from "./youTube";
+import { redirectToLogin } from "../common/global";
+import getUser from "./getUser";
 const user = getUser();
 
 let clubSocket;
-function initSocket () {
-  clubSocket = io(`/${user.clubId}`, {
-    query: {
-      userId: user._id,
-      clubId: user.clubId
-    }
-  })
-  clubSocket.on('connect', () => {
-    console.log('Club socket connected');
-    initYouTube()
-  })
+function initSocket() {
+  if (user) {
+    clubSocket = io(`/${user.clubId}`, {
+      query: {
+        userId: user._id,
+        clubId: user.clubId,
+      },
+    });
+
+    clubSocket.on("connect", () => {
+      console.log("Club socket connected");
+      initYouTube();
+    });
+  } else {
+    redirectToLogin();
+  }
 }
 
-export { clubSocket }
+export { clubSocket };
 export default initSocket;

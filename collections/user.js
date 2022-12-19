@@ -1,39 +1,42 @@
 module.exports = {
-  name: 'user',
+  name: "user",
   validator: {
     $jsonSchema: {
-      bsonType: 'object',
-      required: ['firstName', 'lastName', 'nickName', 'clubId'],
+      bsonType: "object",
+      required: ["active", "firstName", "lastName", "nickName", "clubId"],
       properties: {
         firstName: {
-          bsonType: 'string',
+          bsonType: "string",
           minLength: 3,
           maxLength: 20,
-          description: 'First name required'
+          description: "First name required",
         },
         lastName: {
-          bsonType: 'string',
+          bsonType: "string",
           minLength: 3,
           maxLength: 20,
-          description: 'Last name required'
+          description: "Last name required",
         },
         nickName: {
-          bsonType: 'string',
+          bsonType: "string",
           minLength: 3,
           maxLength: 20,
-          description: 'Nickname required'
+          description: "Nickname required",
         },
         password: {
-          bsonType: 'string',
+          bsonType: "string",
           minLength: 6,
           maxLength: 20,
-          description: 'Password Required'
+          description: "Password Required",
         },
         clubId: {
-          bsonType: 'objectId',
-          description: 'Club id required'
-        }
-      }
-    }
-  }
+          bsonType: "objectId",
+          description: "Club id required",
+        },
+        active: {
+          bsonType: "boolean",
+        },
+      },
+    },
+  },
 };

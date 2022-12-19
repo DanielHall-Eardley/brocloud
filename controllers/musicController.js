@@ -1,9 +1,10 @@
 const catchError = require("../util/catchError");
 const throwError = require("../util/throwError");
 const sanitizeHtml = require("sanitize-html");
-const { initClubSocket, clubNs } = require("../util/socketUtil");
-const youtubeApiKey = process.env.YOUTUBE_API_KEY;
+const initClubSocket = require("../util/socketUtil");
 const formatHistory = require("../util/formatHistory");
+const updateActiveUser = require("../util/updateActiveUser");
+const sanitizeUser = require("../util/sanitizeUser");
 
 const {
   updateDocument,
@@ -27,14 +28,14 @@ const extractIds = (req) => {
 exports.getClub = catchError(async (req, res, next) => {
   const { clubId, userId } = req.params;
 
-  const user = await User.findOne({ _id: new ObjectID(userId) });
+  const user = await updateActiveUser(userId, true);
+
   if (!user) {
     return res.redirect("/signup");
   }
 
   const membersPromise = findDocuments(User, { clubId: new ObjectID(clubId) });
   const clubPromise = Club.findOne({ _id: new ObjectID(clubId) });
-
   const [members, club] = await Promise.all([membersPromise, clubPromise]);
 
   if (!club) {
@@ -50,7 +51,9 @@ exports.getClub = catchError(async (req, res, next) => {
     upNext: club.upNext,
   };
 
-  initClubSocket(club._id, userId);
+  const sanitizedUser = sanitizeUser(user);
+  const clubSocket = initClubSocket(club._id);
+  clubSocket.emit("updateActiveMember", sanitizedUser);
   res.render("./main/index.ejs", data);
 });
 
@@ -85,7 +88,7 @@ exports.addVideo = catchError(async (req, res, next) => {
   const updatedClub = await updateDocument(Club, filter, update);
   const lastVideo = updatedClub.upNext.pop();
 
-  const clubSocket = clubNs();
+  const clubSocket = initClubSocket();
   clubSocket.emit("addToPlaylist", { video: lastVideo });
   res.status(200).json({ message: "Video added" });
 });

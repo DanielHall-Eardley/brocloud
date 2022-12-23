@@ -15,7 +15,6 @@ function initClubSocket(clubId) {
       }
     };
 
-    socket.on("startSync", forwardClubSocket(socketController.startSync));
     socket.on("queueNext", forwardClubSocket(socketController.queueNext));
     socket.on("disconnect", forwardClubSocket(socketController.pageClose));
   });

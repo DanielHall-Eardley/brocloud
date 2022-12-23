@@ -5,6 +5,8 @@ const initClubSocket = require("../util/socketUtil");
 const formatHistory = require("../util/formatHistory");
 const updateActiveUser = require("../util/updateActiveUser");
 const sanitizeUser = require("../util/sanitizeUser");
+const { queueNext } = require("./socketController");
+const findVideo = require("../util/findVideo");
 
 const {
   updateDocument,
@@ -60,13 +62,16 @@ exports.getClub = catchError(async (req, res, next) => {
 exports.addVideo = catchError(async (req, res, next) => {
   const auth = extractIds(req);
 
-  const { name, videoId } = req.body;
+  const { name, videoId, timestamp } = req.body;
 
   if (!name || !videoId) {
     throwError("There was a problem adding your video", 422);
   }
 
-  const user = await User.findOne({ _id: new ObjectID(auth.userId) });
+  const userPromise = User.findOne({ _id: new ObjectID(auth.userId) });
+  const clubPromise = Club.findOne({ _id: new ObjectID(auth.clubId) });
+  const [user, club] = await Promise.all([userPromise, clubPromise]);
+
   const userFullName = `${user.firstName} \"${user.nickName}\" ${user.lastName}`;
   const sanitizeName = sanitizeHtml(name);
 
@@ -77,6 +82,10 @@ exports.addVideo = catchError(async (req, res, next) => {
     userFullName,
   };
 
+  if (club.upNext.length === 0) {
+    videoDoc.playedAtTime = timestamp;
+  }
+
   const filter = {
     _id: new ObjectID(auth.clubId),
   };
@@ -86,9 +95,34 @@ exports.addVideo = catchError(async (req, res, next) => {
   };
 
   const updatedClub = await updateDocument(Club, filter, update);
-  const lastVideo = updatedClub.upNext.pop();
-
-  const clubSocket = initClubSocket();
-  clubSocket.emit("addToPlaylist", { video: lastVideo });
+  const data = {
+    count: updatedClub.upNext.length,
+    video: updatedClub.upNext.pop(),
+  };
+  const clubSocket = initClubSocket(club._id);
+  clubSocket.emit("addToPlaylist", data);
   res.status(200).json({ message: "Video added" });
+});
+
+exports.getPlaylist = catchError(async (req, res, next) => {
+  const { clubId } = extractIds(req);
+  const { videoId, timestamp } = req.body;
+  const club = await Club.findOne({ _id: new ObjectID(clubId) });
+
+  const currentVideo = findVideo(club.upNext, videoId);
+  /* If the video's ellapsed time is greater then
+  the video's duration, cue next video*/
+  if (currentVideo) {
+    const data = {
+      videoId,
+      timestamp,
+    };
+    const obj = {
+      clubId,
+    };
+    const clubSocket = initClubSocket(club._id);
+    queueNext(data, clubSocket, obj);
+  } else {
+    res.status(200).json(club);
+  }
 });

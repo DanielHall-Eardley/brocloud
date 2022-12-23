@@ -3,40 +3,7 @@ const { ObjectID } = require("mongodb");
 const Club = dbConnection().collection("club");
 const formatHistory = require("../util/formatHistory");
 const updateActiveUser = require("../util/updateActiveUser");
-
-exports.startSync = async ({ videoId, timestamp }, clubSocket, { clubId }) => {
-  const filter = { _id: new ObjectID(clubId) };
-  const club = await Club.findOne(filter);
-  const playingVideo = club.upNext.shift();
-
-  if (!playingVideo) return;
-
-  if (
-    playingVideo.videoId.toString() === videoId.toString() &&
-    !playingVideo.playedAtTime
-  ) {
-    const query = {
-      ...filter,
-      "upNext.videoId": videoId,
-    };
-    const update = {
-      $set: {
-        "upNext.$.playedAtTime": timestamp,
-      },
-    };
-
-    await updateDocument(Club, query, update);
-  }
-};
-
-function findVideo(current, videoId) {
-  const video = current[0];
-
-  if (video.videoId.toString() === videoId.toString()) {
-    return video;
-  }
-  return false;
-}
+const findVideo = require("../util/findVideo");
 
 function addVideoToHistory(history, video) {
   const filteredHistory = history.filter(
@@ -45,10 +12,17 @@ function addVideoToHistory(history, video) {
   return [video, ...filteredHistory];
 }
 
-function removeVideoFromUpNext(current, videoId) {
-  return current.filter(
+function removeVideoFromUpNext(current, videoId, timestamp) {
+  // remove previous video
+  const updatedCurrent = current.filter(
     (video) => video.videoId.toString() !== videoId.toString()
   );
+  // add sync timestamp to next video
+  if (updatedCurrent[0] && !updatedCurrent[0].playedAtTime) {
+    updatedCurrent[0].playedAtTime = timestamp;
+  }
+
+  return updatedCurrent;
 }
 
 async function updatePlaylist(upNext, history, query, db = Club) {
@@ -69,14 +43,18 @@ async function updatePlaylist(upNext, history, query, db = Club) {
 /* Remove the played video from the queue, 
 remove the played video from the history
 if exists, add played video to start of history */
-exports.queueNext = async ({ videoId }, clubSocket, { clubId }) => {
+exports.queueNext = async ({ videoId, timestamp }, clubSocket, { clubId }) => {
   const query = { _id: new ObjectID(clubId) };
   const club = await Club.findOne(query);
   const video = findVideo(club.upNext, videoId);
 
   if (video) {
     const updatedHistory = addVideoToHistory(club.history, video);
-    const updatedCurrent = removeVideoFromUpNext(club.upNext, videoId);
+    const updatedCurrent = removeVideoFromUpNext(
+      club.upNext,
+      videoId,
+      timestamp
+    );
     const result = await updatePlaylist(updatedCurrent, updatedHistory, query);
     const formattedHistory = formatHistory(result.history);
 

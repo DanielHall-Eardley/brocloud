@@ -5,6 +5,7 @@ async function submitAddVideo(button, name, videoId) {
     const body = {
       name,
       videoId,
+      timestamp: new Date(),
     };
 
     await api.addVideo(body);

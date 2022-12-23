@@ -52,4 +52,8 @@ export default {
     const data = await request("/login", body);
     return Promise.resolve(data);
   },
+  getPlaylist: async (body) => {
+    const data = await request("/music/playlist/", body);
+    return Promise.resolve(data);
+  },
 };

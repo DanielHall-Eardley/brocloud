@@ -3,7 +3,6 @@ import addToPlaylist from "./addToPlaylist";
 import updateActiveMember from "./updateActiveMember";
 import queueNext from "./queueNext";
 import deactivateMember from "./deactivateMember";
-import { updateTrackPosition } from "./sync";
 
 function initSocketListeners() {
   clubSocket.on("updateActiveMember", updateActiveMember);

@@ -1,66 +1,9 @@
 import { player } from "./youTube";
 import { createHTMLComponent } from "../../util/createHTMLComponent";
 import addHistoryListeners from "./addHistoryListeners";
-
-function createQueueVideo(video) {
-  const videoElement = [
-    {
-      name: "li",
-      attributes: { id: video._id },
-      content: video.name,
-      children: [
-        {
-          name: "input",
-          attributes: {
-            type: "hidden",
-            class: "next-video",
-            value: video.videoId,
-          },
-        },
-        {
-          name: "div",
-          content: video.userFullName,
-          attributes: {
-            class: "main--name-highlight",
-            value: video.videoId,
-          },
-        },
-      ],
-    },
-  ];
-
-  return videoElement;
-}
-
-function createPlayingVideo(video) {
-  const videoElement = [
-    {
-      name: "li",
-      attributes: { id: video._id },
-      content: video.name,
-      children: [
-        {
-          name: "input",
-          attributes: {
-            type: "hidden",
-            id: "current-video",
-            value: video.videoId,
-          },
-        },
-        {
-          name: "div",
-          content: video.userFullName,
-          attributes: {
-            class: "main--name-highlight",
-            value: video.videoId,
-          },
-        },
-      ],
-    },
-  ];
-
-  return videoElement;
-}
+import createPlayingVideo from "./createPlayingVideo";
+import createQueueVideo from "./createQueueVideo";
+import { syncVideo } from "./sync";
 
 function createHistoryVideo(video) {
   const videoElement = [
@@ -123,6 +66,7 @@ function queueNext(data) {
       if (index === 0) {
         const htmlVideoElement = createHTMLComponent(createPlayingVideo(video));
         upNextContainer.append(htmlVideoElement);
+        syncVideo(video.playedAtTime);
       } else {
         const htmlVideoElement = createHTMLComponent(createQueueVideo(video));
         upNextContainer.append(htmlVideoElement);

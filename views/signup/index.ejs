@@ -30,7 +30,9 @@
         <ul id="clubs" class="signup-join--club">
           <% clubs.forEach((club) => { %>
           <li>
-            <button id="<%= club._id %>" type="button"><%= club.name %></button>
+            <button class="btn--club" id="<%= club._id %>" type="button">
+              <%= club.name %>
+            </button>
           </li>
           <% }); %>
         </ul>

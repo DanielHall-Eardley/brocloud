@@ -32,12 +32,12 @@ const request = async (url, body, method) => {
 };
 
 export default {
-  signupJoin: async (body, clubId) => {
-    const data = await request(`/signup/join/${clubId}`, body);
+  signupJoin: async (body) => {
+    const data = await request(`/signup/join`, body);
     return Promise.resolve(data);
   },
-  signupCreate: async (body, clubName) => {
-    const data = await request(`/signup/create/${clubName}`, body);
+  signupCreate: async (body) => {
+    const data = await request(`/signup/create`, body);
     return Promise.resolve(data);
   },
   search: async (body) => {

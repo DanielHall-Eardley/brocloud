@@ -14,8 +14,6 @@ export const FormState = class FormState {
   eventListener(event) {
     const key = event.target.name;
     const value = event.target.value;
-
-    // Update the form state
     this.updateState.apply(this, [key, value]);
   }
 
@@ -23,6 +21,8 @@ export const FormState = class FormState {
     const elements = form.children;
     for (let element of elements) {
       if (element.nodeName === "INPUT" || element.nodeName === "SELECT") {
+        const inputName = element.name;
+        this.state[inputName] = "";
         element.addEventListener("input", this.eventListener.bind(this));
       }
     }

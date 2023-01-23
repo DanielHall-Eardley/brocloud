@@ -23,7 +23,8 @@
     "n": "^9.0.1",
     "node-fetch": "^2.6.1",
     "sanitize-html": "^2.3.3",
-    "socket.io": "^4.0.1"
+    "socket.io": "^4.0.1",
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "css-loader": "^5.2.4",

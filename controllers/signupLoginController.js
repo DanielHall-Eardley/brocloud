@@ -6,6 +6,7 @@ const { createJWT } = require("../util/createJWT");
 const initClubSocket = require("../util/socketUtil");
 const updateActiveUser = require("../util/updateActiveUser");
 const sanitizeUser = require("../util/sanitizeUser");
+const validateUser = require("../util/validateUser");
 
 const {
   addDocument,
@@ -85,7 +86,12 @@ async function createUser(body, clubId) {
 }
 
 exports.joinClub = catchError(async (req, res, next) => {
-  const clubId = req.params.clubId;
+  const userError = validateUser(req.body);
+  if (userError) {
+    return throwError(userError);
+  }
+
+  const clubId = req.body.clubId;
   const existingClub = await Club.findOne({ _id: new ObjectID(clubId) });
   if (!existingClub) {
     return throwError("Club not found", 404);
@@ -115,7 +121,12 @@ async function createClub(clubName) {
 }
 
 exports.createClub = catchError(async (req, res, next) => {
-  const clubName = req.params.clubName;
+  const userError = validateUser(req.body);
+  if (userError) {
+    return throwError(userError);
+  }
+
+  const clubName = req.body.clubName;
   const existingClub = await Club.findOne({ name: clubName });
   if (existingClub) {
     return throwError("A Club already exists with this name", 403);

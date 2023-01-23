@@ -7,8 +7,6 @@ function setPlayStart() {
     const videoStartTime = document.getElementById("video-timestamp")?.value;
     if (videoStartTime) {
       syncVideo(videoStartTime);
-    } else {
-      // set video timestamp via api
     }
   }
 }

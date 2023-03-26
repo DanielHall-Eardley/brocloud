@@ -57,4 +57,5 @@ setupUtil.connect(initServer).catch((error) => {
 /*
   To do 
   - get people youtube login information to retrieve their playlists
- */
+  - push to server host is set to localhost url
+  */
